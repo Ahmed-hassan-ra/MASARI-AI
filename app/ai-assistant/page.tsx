@@ -9,12 +9,14 @@ import { AIInsights } from "@/components/ai-insights"
 import { BudgetOptimizer } from "@/components/budget-optimizer"
 import { AIAssistant } from "@/components/ai/assistant"
 import { Brain, Target, TrendingUp, Sparkles, MessageSquare } from "lucide-react"
+import { useCurrency } from "@/lib/currency-context"
 
 export default function AIAssistantPage() {
   const [period, setPeriod] = useState("month")
   const [refreshKey, setRefreshKey] = useState(0)
   const [insightCount, setInsightCount] = useState<number | null>(null)
   const [potentialSavings, setPotentialSavings] = useState<number | null>(null)
+  const { formatCurrency } = useCurrency()
 
   const handleRefresh = () => {
     setRefreshKey(prev => prev + 1)
@@ -97,7 +99,7 @@ export default function AIAssistantPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">
-              {potentialSavings === null ? "—" : `$${potentialSavings.toFixed(0)}`}
+              {potentialSavings === null ? "—" : formatCurrency(potentialSavings)}
             </div>
             <p className="text-sm text-primary/80">Potential savings</p>
           </CardContent>

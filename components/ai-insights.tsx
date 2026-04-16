@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Loader2, AlertTriangle, Lightbulb, Trophy, TrendingUp, Brain, DollarSign } from "lucide-react"
 import { toast } from "sonner"
+import { useCurrency } from "@/lib/currency-context"
 
 interface PersonalizedInsight {
   id: string
@@ -28,6 +29,7 @@ export function AIInsights({ period = "month", refreshKey }: AIInsightsProps) {
   const [insights, setInsights] = useState<PersonalizedInsight[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { formatCurrency } = useCurrency()
 
   useEffect(() => {
     const fetchInsights = async () => {
@@ -199,7 +201,7 @@ export function AIInsights({ period = "month", refreshKey }: AIInsightsProps) {
                     <div className="flex items-center gap-1 text-green-600">
                       <DollarSign className="h-4 w-4" />
                       <span className="text-sm font-medium">
-                        Save ${insight.savings.toFixed(2)}
+                        Save {formatCurrency(insight.savings)}
                       </span>
                     </div>
                   )}

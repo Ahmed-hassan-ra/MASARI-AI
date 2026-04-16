@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { DollarSign, PlusCircle, AlertCircle, Target, TrendingUp, TrendingDown, Edit, Trash2, Calendar } from "lucide-react"
+import { useCurrency } from "@/lib/currency-context"
 import { BudgetTemplates } from "@/components/budgets/budget-templates"
 import { CreateBudgetDialog } from "@/components/budgets/create-budget-dialog"
 import { MonthSelector } from "@/components/month-selector"
@@ -66,6 +67,7 @@ export default function BudgetsPage() {
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear())
   
   const { toast } = useToast()
+  const { formatCurrency } = useCurrency()
 
   const expenseForm = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseFormSchema),
@@ -369,7 +371,7 @@ export default function BudgetsPage() {
                   <Target className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${totalBudgetAmount.toFixed(2)}</div>
+                  <div className="text-2xl font-bold">{formatCurrency(totalBudgetAmount)}</div>
                   <p className="text-xs text-muted-foreground">
                     {currentBudget.categories.length} categories
                   </p>
@@ -381,7 +383,7 @@ export default function BudgetsPage() {
                   <TrendingDown className="h-4 w-4 text-red-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${totalSpent.toFixed(2)}</div>
+                  <div className="text-2xl font-bold">{formatCurrency(totalSpent)}</div>
                   <p className="text-xs text-muted-foreground">
                     {spentPercentage.toFixed(1)}% of budget
                   </p>
@@ -394,7 +396,7 @@ export default function BudgetsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className={`text-2xl font-bold ${remainingBudget >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    ${Math.abs(remainingBudget).toFixed(2)}
+                    {formatCurrency(Math.abs(remainingBudget))}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {remainingBudget >= 0 ? 'Under budget' : 'Over budget'}
@@ -459,7 +461,7 @@ export default function BudgetsPage() {
                           <div className="space-y-1">
                             <div className="text-sm font-medium">Overall Progress</div>
                             <div className="text-sm text-muted-foreground">
-                              ${totalSpent.toFixed(2)} of ${totalBudgetAmount.toFixed(2)}
+                              {formatCurrency(totalSpent)} of {formatCurrency(totalBudgetAmount)}
                             </div>
                           </div>
                           <div className="text-sm font-medium">
@@ -486,7 +488,7 @@ export default function BudgetsPage() {
                                   <div className="space-y-1">
                                     <div className="text-sm font-medium">{category.name}</div>
                                     <div className="text-sm text-muted-foreground">
-                                      ${category.spent.toFixed(2)} of ${category.amount.toFixed(2)}
+                                      {formatCurrency(category.spent)} of {formatCurrency(category.amount)}
                                     </div>
                                   </div>
                                   <div className={`text-sm font-medium ${isOverBudget ? 'text-red-600' : ''}`}>
@@ -499,7 +501,7 @@ export default function BudgetsPage() {
                                 />
                                 {isOverBudget && (
                                   <p className="text-xs text-red-600">
-                                    Over by ${(category.spent - category.amount).toFixed(2)}
+                                    Over by {formatCurrency(category.spent - category.amount)}
                                   </p>
                                 )}
                               </div>
@@ -646,7 +648,7 @@ export default function BudgetsPage() {
                                 {budgetDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                ${totalSpent.toFixed(2)} / ${totalBudget.toFixed(2)} ({percentage.toFixed(1)}%)
+                                {formatCurrency(totalSpent)} / {formatCurrency(totalBudget)} ({percentage.toFixed(1)}%)
                               </p>
                             </div>
                             <div className="flex items-center gap-2">

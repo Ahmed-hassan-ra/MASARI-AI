@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, Target, TrendingDown, TrendingUp, Zap, DollarSign } from "lucide-react"
 import { toast } from "sonner"
+import { useCurrency } from "@/lib/currency-context"
 
 interface BudgetRecommendation {
   category: string
@@ -26,6 +27,7 @@ export function BudgetOptimizer({ period = "month", refreshKey }: BudgetOptimize
   const [recommendations, setRecommendations] = useState<BudgetRecommendation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { formatCurrency } = useCurrency()
   const [totalSavings, setTotalSavings] = useState(0)
 
   useEffect(() => {
@@ -74,7 +76,7 @@ export function BudgetOptimizer({ period = "month", refreshKey }: BudgetOptimize
 
   const handleApplyBudget = (recommendation: BudgetRecommendation) => {
     toast.success("Budget Applied!", {
-      description: `Set ${recommendation.category} budget to $${recommendation.recommendedBudget.toFixed(2)}`,
+      description: `Set ${recommendation.category} budget to ${formatCurrency(recommendation.recommendedBudget)}`,
     })
   }
 
@@ -162,7 +164,7 @@ export function BudgetOptimizer({ period = "month", refreshKey }: BudgetOptimize
             <h3 className="font-semibold text-lg">Optimization Summary</h3>
             <div className="flex items-center gap-1 text-green-600">
               <DollarSign className="h-5 w-5" />
-              <span className="font-bold text-xl">${totalSavings.toFixed(2)}</span>
+              <span className="font-bold text-xl">{formatCurrency(totalSavings)}</span>
             </div>
           </div>
           <p className="text-sm text-gray-600 mb-3">
@@ -195,12 +197,12 @@ export function BudgetOptimizer({ period = "month", refreshKey }: BudgetOptimize
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <p className="text-sm text-gray-500">Current Spending</p>
-                    <p className="text-xl font-bold">${rec.currentSpending.toFixed(2)}</p>
+                    <p className="text-xl font-bold">{formatCurrency(rec.currentSpending)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Recommended Budget</p>
                     <p className="text-xl font-bold text-blue-600">
-                      ${rec.recommendedBudget.toFixed(2)}
+                      {formatCurrency(rec.recommendedBudget)}
                     </p>
                   </div>
                 </div>
@@ -228,7 +230,7 @@ export function BudgetOptimizer({ period = "month", refreshKey }: BudgetOptimize
                     <span className={`text-sm font-medium ${
                       isIncrease ? 'text-red-600' : 'text-green-600'
                     }`}>
-                      {isIncrease ? '+' : '-'}${Math.abs(rec.potentialSavings).toFixed(2)} 
+                      {isIncrease ? '+' : '-'}{formatCurrency(Math.abs(rec.potentialSavings))}
                       ({Math.abs(savingsPercentage).toFixed(1)}%)
                     </span>
                   </div>

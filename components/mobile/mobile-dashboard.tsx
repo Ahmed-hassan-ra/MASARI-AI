@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Plus, DollarSign, TrendingUp, TrendingDown, PiggyBank, Settings } from "lucide-react"
 import { AddTransactionDialog } from "@/components/add-transaction-dialog"
 import Link from "next/link"
+import { useCurrency } from "@/lib/currency-context"
 
 interface DashboardData {
   balance: number
@@ -25,6 +26,7 @@ export function MobileDashboard() {
     incomeChange: 0,
     expensesChange: 0
   })
+  const { formatCurrency } = useCurrency()
 
   const fetchDashboardData = async () => {
     try {
@@ -61,7 +63,7 @@ export function MobileDashboard() {
         <CardContent className="p-6">
           <div className="text-center">
             <p className="text-sm opacity-90 mb-1">Total Balance</p>
-            <h2 className="text-3xl font-bold mb-2">${data.balance.toFixed(2)}</h2>
+            <h2 className="text-3xl font-bold mb-2">{formatCurrency(data.balance)}</h2>
             <p className="text-xs opacity-75">+0.0% from last month</p>
           </div>
         </CardContent>
@@ -79,7 +81,7 @@ export function MobileDashboard() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Income</p>
-              <p className="text-xl font-bold">${data.income.toFixed(2)}</p>
+              <p className="text-xl font-bold">{formatCurrency(data.income)}</p>
             </div>
           </CardContent>
         </Card>
@@ -94,7 +96,7 @@ export function MobileDashboard() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Expenses</p>
-              <p className="text-xl font-bold">${data.expenses.toFixed(2)}</p>
+              <p className="text-xl font-bold">{formatCurrency(data.expenses)}</p>
             </div>
           </CardContent>
         </Card>
@@ -131,7 +133,7 @@ export function MobileDashboard() {
           <CardContent className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Net Income</span>
-              <span className="font-medium">${(data.income - data.expenses).toFixed(2)}</span>
+              <span className="font-medium">{formatCurrency(data.income - data.expenses)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Spending vs Income</span>
