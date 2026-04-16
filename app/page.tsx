@@ -478,7 +478,7 @@ export default function LandingPage() {
 
       <GrainOverlay />
       <MouseSpotlight />
-      <BackgroundBlobs />
+      <div className="dark:hidden"><BackgroundBlobs /></div>
       <div className="hidden dark:block"><TechnoGridBg /></div>
 
       {/* ── NAVBAR ──────────────────────────────────────────────── */}
