@@ -6,7 +6,6 @@ import { motion, useSpring, useMotionValue } from "framer-motion"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sun, Moon } from "lucide-react"
-import { TechnoGridBg } from "@/components/techno-grid-bg"
 import {
   Wallet, BarChart3, Receipt, ShieldCheck,
   TrendingUp, ArrowRight, CheckCircle2, Brain, Target,
@@ -474,11 +473,11 @@ function PrimaryBtn({ children, href, size = "default" }: {
    ───────────────────────────────────────────────────────────────── */
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#020617] text-white overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] text-[#015C92] dark:text-white overflow-x-hidden transition-colors duration-300">
 
       <GrainOverlay />
       <MouseSpotlight />
-      <TechnoGridBg />
+      <BackgroundBlobs />
 
       {/* ── NAVBAR ──────────────────────────────────────────────── */}
       <header className="relative z-50 flex items-center justify-between px-6 md:px-12 h-16">
