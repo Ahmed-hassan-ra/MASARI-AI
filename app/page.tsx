@@ -522,12 +522,7 @@ export default function LandingPage() {
           style={{ color: "var(--lp-heading)" }}
         >
           <span className="text-slate-900 dark:text-white">Streamline your</span><br />
-          <span
-            className="bg-clip-text text-transparent inline-block pr-1"
-            style={{
-              backgroundImage: `linear-gradient(90deg, ${C.deep}, ${C.primary}, ${C.icy})`,
-            }}
-          >
+          <span style={{ color: C.primary }}>
             financial
           </span>
           <span className="text-slate-900 dark:text-white"> operations</span>
