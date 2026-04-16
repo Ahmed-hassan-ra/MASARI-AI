@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/db"
-import { deepseekStream, type DSMessage } from "@/lib/deepseek"
+import { groqStream, type GroqMessage } from "@/lib/groq"
 
 export async function POST(req: Request) {
   try {
@@ -123,15 +123,15 @@ ${recentTxSummary}
 - Keep replies concise — 3-5 sentences unless the user asks for detail`
 
     // ── Stream the response via native fetch ──────────────────────────────────
-    const dsMessages: DSMessage[] = [
+    const groqMessages: GroqMessage[] = [
       { role: "system", content: systemPrompt },
       ...messages.map((m: { role: string; content: string }) => ({
-        role: m.role as DSMessage["role"],
+        role: m.role as GroqMessage["role"],
         content: m.content,
       })),
     ]
 
-    const stream = await deepseekStream(dsMessages, { temperature: 0.7, max_tokens: 1024 })
+    const stream = await groqStream(groqMessages, { temperature: 0.7, max_tokens: 1024 })
 
     return new NextResponse(stream, {
       headers: {

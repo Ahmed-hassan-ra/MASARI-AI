@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { createWorker } from "tesseract.js"
-import { deepseekJSON } from "@/lib/deepseek"
+import { groqJSON } from "@/lib/groq"
 
 interface ReceiptItem {
   name: string
@@ -199,8 +199,8 @@ Rules:
 `.trim()
 
 async function parseReceiptWithAI(text: string): Promise<ParsedReceipt> {
-  if (process.env.DEEPSEEK_API_KEY) {
-    const result = await parseWithDeepSeek(text)
+  if (process.env.GROQ_API_KEY) {
+    const result = await parseWithGroq(text)
     if (result) return { ...result, rawText: text }
   }
 
@@ -208,15 +208,15 @@ async function parseReceiptWithAI(text: string): Promise<ParsedReceipt> {
   return basicFallbackParser(text)
 }
 
-async function parseWithDeepSeek(text: string): Promise<Omit<ParsedReceipt, "rawText"> | null> {
+async function parseWithGroq(text: string): Promise<Omit<ParsedReceipt, "rawText"> | null> {
   try {
-    const content = await deepseekJSON(
+    const content = await groqJSON(
       [{ role: "user", content: PARSE_PROMPT(text) }],
       { temperature: 0.1, max_tokens: 2000 }
     )
     return normaliseAIParsedData(JSON.parse(content))
   } catch (error) {
-    console.error("[DEEPSEEK_PARSE]", error)
+    console.error("[GROQ_PARSE]", error)
     return null
   }
 }

@@ -1,35 +1,20 @@
 /**
- * DeepSeek native fetch client — zero SDK dependency.
- * Uses the DeepSeek Chat Completions API directly via fetch.
- * https://api.deepseek.com/chat/completions
+ * Groq fetch client — zero SDK dependency.
+ * Uses the Groq Chat Completions API directly via fetch.
  */
 
-const DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+const GROQ_MODEL_JSON = "llama-3.3-70b-versatile"
+const GROQ_MODEL_STREAM = "llama-3.3-70b-versatile"
 
-export interface DSMessage {
+export interface GroqMessage {
   role: "system" | "user" | "assistant"
   content: string
 }
 
-interface DSRequestBase {
-  model?: string
-  messages: DSMessage[]
-  temperature?: number
-  max_tokens?: number
-}
-
-interface DSRequestJSON extends DSRequestBase {
-  stream?: false
-  response_format?: { type: "json_object" }
-}
-
-interface DSRequestStream extends DSRequestBase {
-  stream: true
-}
-
 function headers() {
-  const key = process.env.DEEPSEEK_API_KEY
-  if (!key) throw new Error("DEEPSEEK_API_KEY is not set")
+  const key = process.env.GROQ_API_KEY
+  if (!key) throw new Error("GROQ_API_KEY is not set")
   return {
     "Content-Type": "application/json",
     Authorization: `Bearer ${key}`,
@@ -47,19 +32,18 @@ async function fetchWithRetry(url: string, init: RequestInit, retries = 3): Prom
 }
 
 /** Single-shot JSON completion — returns the text content string */
-export async function deepseekJSON(
-  messages: DSMessage[],
-  opts: Omit<DSRequestJSON, "messages"> = {}
+export async function groqJSON(
+  messages: GroqMessage[],
+  opts: { temperature?: number; max_tokens?: number } = {}
 ): Promise<string> {
-  const res = await fetchWithRetry(DEEPSEEK_URL, {
+  const res = await fetchWithRetry(GROQ_URL, {
     method: "POST",
     headers: headers(),
     body: JSON.stringify({
-      model: "deepseek-chat",
-      temperature: 0.3,
-      max_tokens: 2000,
+      model: GROQ_MODEL_JSON,
+      temperature: opts.temperature ?? 0.3,
+      max_tokens: opts.max_tokens ?? 2000,
       response_format: { type: "json_object" },
-      ...opts,
       messages,
       stream: false,
     }),
@@ -67,28 +51,27 @@ export async function deepseekJSON(
 
   if (!res.ok) {
     const err = await res.text()
-    throw new Error(`DeepSeek error ${res.status}: ${err}`)
+    throw new Error(`Groq error ${res.status}: ${err}`)
   }
 
   const data = await res.json()
   const content = data?.choices?.[0]?.message?.content
-  if (!content) throw new Error("Empty response from DeepSeek")
+  if (!content) throw new Error("Empty response from Groq")
   return content
 }
 
 /** Streaming SSE completion — returns a ReadableStream of SSE text */
-export async function deepseekStream(
-  messages: DSMessage[],
-  opts: Omit<DSRequestStream, "messages" | "stream"> = {}
+export async function groqStream(
+  messages: GroqMessage[],
+  opts: { temperature?: number; max_tokens?: number } = {}
 ): Promise<ReadableStream<Uint8Array>> {
-  const res = await fetchWithRetry(DEEPSEEK_URL, {
+  const res = await fetchWithRetry(GROQ_URL, {
     method: "POST",
     headers: headers(),
     body: JSON.stringify({
-      model: "deepseek-chat",
-      temperature: 0.7,
-      max_tokens: 4096,
-      ...opts,
+      model: GROQ_MODEL_STREAM,
+      temperature: opts.temperature ?? 0.7,
+      max_tokens: opts.max_tokens ?? 4096,
       messages,
       stream: true,
     }),
@@ -96,15 +79,14 @@ export async function deepseekStream(
 
   if (!res.ok) {
     const err = await res.text()
-    throw new Error(`DeepSeek error ${res.status}: ${err}`)
+    throw new Error(`Groq error ${res.status}: ${err}`)
   }
 
-  if (!res.body) throw new Error("No response body from DeepSeek")
+  if (!res.body) throw new Error("No response body from Groq")
 
   const encoder = new TextEncoder()
   const decoder = new TextDecoder()
 
-  // Transform DeepSeek SSE → our SSE format { content: "..." }
   return new ReadableStream<Uint8Array>({
     async start(controller) {
       const reader = res.body!.getReader()

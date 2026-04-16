@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/db"
-import { deepseekJSON } from "@/lib/deepseek"
+import { groqJSON } from "@/lib/groq"
 
 export async function GET(req: Request) {
   try {
@@ -114,7 +114,7 @@ Rules:
 - Mix types: include warnings, suggestions, achievements, and predictions
 - Return only the JSON array, no other text`
 
-    const content = await deepseekJSON(
+    const content = await groqJSON(
       [{ role: "user", content: prompt }],
       { temperature: 0.3, max_tokens: 2000 }
     )

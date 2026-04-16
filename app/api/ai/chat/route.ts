@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { deepseekStream, type DSMessage } from "@/lib/deepseek"
+import { groqStream, type GroqMessage } from "@/lib/groq"
 
 const messageSchema = z.object({
   role: z.enum(["user", "assistant", "system"]),
@@ -11,7 +11,7 @@ const requestSchema = z.object({
   messages: z.array(messageSchema),
 })
 
-const SYSTEM_PROMPT: DSMessage = {
+const SYSTEM_PROMPT: GroqMessage = {
   role: "system",
   content: `You are a helpful and knowledgeable financial assistant. You help users with:
 - Budgeting and expense tracking
@@ -30,16 +30,16 @@ application that helps track budgets, expenses, and financial goals.`,
 
 export async function POST(req: Request) {
   try {
-    if (!process.env.DEEPSEEK_API_KEY) {
+    if (!process.env.GROQ_API_KEY) {
       return NextResponse.json({ error: "AI service not configured" }, { status: 503 })
     }
 
     const body = await req.json()
     const { messages } = requestSchema.parse(body)
 
-    const stream = await deepseekStream([
+    const stream = await groqStream([
       SYSTEM_PROMPT,
-      ...messages.map(m => ({ role: m.role, content: m.content } as DSMessage)),
+      ...messages.map(m => ({ role: m.role, content: m.content } as GroqMessage)),
     ])
 
     return new NextResponse(stream, {
