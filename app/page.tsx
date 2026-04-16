@@ -6,7 +6,6 @@ import { motion, useSpring, useMotionValue } from "framer-motion"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sun, Moon } from "lucide-react"
-import { DeepAbyssBg } from "@/components/deep-abyss-bg"
 import {
   Wallet, BarChart3, Receipt, ShieldCheck,
   TrendingUp, ArrowRight, CheckCircle2, Brain, Target,
@@ -479,8 +478,6 @@ export default function LandingPage() {
       <GrainOverlay />
       <MouseSpotlight />
       <BackgroundBlobs />
-      {/* Deep Abyss bg — only active in dark mode */}
-      <div className="hidden dark:block"><DeepAbyssBg /></div>
 
       {/* ── NAVBAR ──────────────────────────────────────────────── */}
       <header className="relative z-50 flex items-center justify-between px-6 md:px-12 h-16">
