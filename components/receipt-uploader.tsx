@@ -94,6 +94,23 @@ const SAMPLE_RECEIPTS = [
   }
 ]
 
+function resizeImage(base64: string, maxPx: number): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new window.Image()
+    img.onload = () => {
+      const scale = Math.min(1, maxPx / Math.max(img.width, img.height))
+      const canvas = document.createElement("canvas")
+      canvas.width = Math.round(img.width * scale)
+      canvas.height = Math.round(img.height * scale)
+      const ctx = canvas.getContext("2d")!
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      resolve(canvas.toDataURL("image/jpeg", 0.85))
+    }
+    img.onerror = () => resolve(base64) // fallback to original
+    img.src = base64
+  })
+}
+
 export function ReceiptUploader() {
   const [activeTab, setActiveTab] = useState("upload")
   const [isUploading, setIsUploading] = useState(false)
@@ -174,15 +191,17 @@ export function ReceiptUploader() {
     setProcessingStatus("🔍 Starting intelligent OCR analysis...")
     
     try {
-      // Convert file to base64
+      // Convert file to base64 with resize to keep payload under 1MB
       const reader = new FileReader()
       reader.onload = async (e) => {
         try {
-          const base64 = e.target?.result as string
+          const rawBase64 = e.target?.result as string
+          // Resize image to max 1024px before sending to API
+          const base64 = await resizeImage(rawBase64, 1024)
       setIsUploading(false)
       setUploadSuccess(true)
       setIsProcessing(true)
-          setProcessingStatus("🧠 Processing with advanced AI algorithms...")
+          setProcessingStatus("Reading receipt...")
 
           // Call the new intelligent OCR API
           const response = await fetch('/api/receipts/ocr', {
@@ -250,7 +269,7 @@ export function ReceiptUploader() {
             setExtractedReceipt(blankReceipt)
             setEditedReceipt(blankReceipt)
             setEditableItems([])
-            setUploadError('OCR processing failed. Please fill in the details manually.')
+            setUploadError(result.error || 'OCR processing failed. Please fill in the details manually.')
           }
         } catch (error) {
         setIsProcessing(false)

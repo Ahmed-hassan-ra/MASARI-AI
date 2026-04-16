@@ -105,7 +105,7 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "llama-3.2-11b-vision-preview",
+        model: "meta-llama/llama-4-scout-17b-16e-instruct",
         temperature: 0.1,
         max_tokens: 2000,
         messages: [
@@ -130,9 +130,9 @@ export async function POST(req: Request) {
 
     if (!response.ok) {
       const err = await response.text()
-      console.error("[OCR_GROQ]", err)
+      console.error("[OCR_GROQ] API error:", response.status, err)
       return NextResponse.json(
-        { error: "Failed to process receipt image. Please try again." },
+        { error: `Vision API error ${response.status}: ${err}` },
         { status: 500 }
       )
     }
