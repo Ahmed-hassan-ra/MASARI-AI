@@ -19,10 +19,10 @@ const WELCOME_MESSAGE: Message = {
   content: "Hello! I'm your Masari AI financial assistant. I have access to your real income, expenses, budgets, and goals — so ask me anything specific about your finances and I'll give you advice based on your actual numbers.",
 }
 
-export function AIAssistant() {
+export function AIAssistant({ inline = false }: { inline?: boolean }) {
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE])
   const [input, setInput] = useState("")
-  const [isMinimized, setIsMinimized] = useState(true)
+  const [isMinimized, setIsMinimized] = useState(!inline)
   const { toast } = useToast()
 
   const sendMessage = async (content: string): Promise<void> => {
@@ -141,7 +141,7 @@ export function AIAssistant() {
     mutation.mutate(content)
   }
 
-  if (isMinimized) {
+  if (isMinimized && !inline) {
     return (
       <Button
         className="rounded-full p-4 h-14 w-14"
@@ -153,19 +153,19 @@ export function AIAssistant() {
   }
 
   return (
-    <Card className="w-full max-w-md shadow-lg">
+    <Card className={inline ? "w-full shadow-none border-0" : "w-full max-w-md shadow-lg"}>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg flex items-center gap-2">
           <Bot className="h-5 w-5" />
           Financial Assistant
         </CardTitle>
-        <Button
+        {!inline && <Button
           variant="ghost"
           size="icon"
           onClick={() => setIsMinimized(true)}
         >
           <Minimize2 className="h-4 w-4" />
-        </Button>
+        </Button>}
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[400px] pr-4">
