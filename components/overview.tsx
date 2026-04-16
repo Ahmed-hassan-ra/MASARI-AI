@@ -1,7 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { PlusCircle } from "lucide-react"
 
 interface ChartData {
   name: string
@@ -9,55 +12,45 @@ interface ChartData {
   expenses: number
 }
 
-const fallbackData: ChartData[] = [
-  { name: "Jan", income: 0, expenses: 0 },
-  { name: "Feb", income: 0, expenses: 0 },
-  { name: "Mar", income: 0, expenses: 0 },
-  { name: "Apr", income: 0, expenses: 0 },
-  { name: "May", income: 0, expenses: 0 },
-  { name: "Jun", income: 0, expenses: 0 },
-]
-
 export function Overview() {
-  const [data, setData] = useState<ChartData[]>(fallbackData)
+  const [data, setData] = useState<ChartData[]>([])
   const [loading, setLoading] = useState(true)
+  const [hasData, setHasData] = useState(false)
 
   useEffect(() => {
-    const fetchChartData = async () => {
-      try {
-        const response = await fetch("/api/reports/chart-data")
-        if (response.ok) {
-          const chartData = await response.json()
+    fetch("/api/reports/chart-data")
+      .then(r => r.ok ? r.json() : null)
+      .then(chartData => {
+        if (chartData && Array.isArray(chartData)) {
+          const hasAny = chartData.some(d => d.income > 0 || d.expenses > 0)
           setData(chartData)
-        } else {
-          // If API fails, use current month data from dashboard
-          const dashboardResponse = await fetch("/api/dashboard/summary")
-          if (dashboardResponse.ok) {
-            const dashboardData = await dashboardResponse.json()
-            const currentMonth = new Date().toLocaleDateString('en-US', { month: 'short' })
-            const updatedData = fallbackData.map(item => 
-              item.name === currentMonth 
-                ? { ...item, income: dashboardData.income, expenses: dashboardData.expenses }
-                : item
-            )
-            setData(updatedData)
-          }
+          setHasData(hasAny)
         }
-      } catch (error) {
-        console.error("Error fetching chart data:", error)
-        // Keep fallback data
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchChartData()
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[350px]">
-        <div className="text-muted-foreground">Loading chart data...</div>
+        <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (!hasData) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[350px] gap-3 text-center">
+        <p className="text-sm text-muted-foreground">Your income and expense chart will appear here once you add transactions.</p>
+        <div className="flex gap-2">
+          <Button asChild size="sm" variant="outline">
+            <Link href="/income"><PlusCircle className="mr-2 h-4 w-4" />Add Income</Link>
+          </Button>
+          <Button asChild size="sm" variant="outline">
+            <Link href="/expenses"><PlusCircle className="mr-2 h-4 w-4" />Add Expense</Link>
+          </Button>
+        </div>
       </div>
     )
   }
@@ -66,16 +59,11 @@ export function Overview() {
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>
         <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-        <YAxis
-          stroke="#888888"
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(value) => `$${value}`}
-        />
-        <Tooltip formatter={(value) => [`$${value}`, ""]} labelFormatter={(label) => `Month: ${label}`} />
-        <Bar dataKey="income" fill="#4ade80" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="expenses" fill="#f87171" radius={[4, 4, 0, 0]} />
+        <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} />
+        <Tooltip formatter={(value) => [`$${value}`, ""]} labelFormatter={label => `Month: ${label}`} />
+        <Legend />
+        <Bar dataKey="income" name="Income" fill="#2D82B5" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="expenses" name="Expenses" fill="#f87171" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
