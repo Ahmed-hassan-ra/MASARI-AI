@@ -16,7 +16,7 @@ interface Message {
 
 const WELCOME_MESSAGE: Message = {
   role: "assistant",
-  content: "Hello! I'm your AI financial assistant powered by LLaMA 3. I can help you with budgeting, expense tracking, and financial advice. How can I assist you today?",
+  content: "Hello! I'm your Masari AI financial assistant. I have access to your real income, expenses, budgets, and goals — so ask me anything specific about your finances and I'll give you advice based on your actual numbers.",
 }
 
 export function AIAssistant() {
@@ -27,7 +27,7 @@ export function AIAssistant() {
 
   const sendMessage = async (content: string): Promise<void> => {
     try {
-    const response = await fetch("/api/ai/chat", {
+    const response = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
