@@ -6,6 +6,7 @@ import { motion, useSpring, useMotionValue } from "framer-motion"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sun, Moon } from "lucide-react"
+import { TechnoGridBg } from "@/components/techno-grid-bg"
 import {
   Wallet, BarChart3, Receipt, ShieldCheck,
   TrendingUp, ArrowRight, CheckCircle2, Brain, Target,
@@ -478,6 +479,7 @@ export default function LandingPage() {
       <GrainOverlay />
       <MouseSpotlight />
       <BackgroundBlobs />
+      <div className="hidden dark:block"><TechnoGridBg /></div>
 
       {/* ── NAVBAR ──────────────────────────────────────────────── */}
       <header className="relative z-50 flex items-center justify-between px-6 md:px-12 h-16">
