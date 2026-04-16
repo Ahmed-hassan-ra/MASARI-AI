@@ -4,7 +4,6 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { SessionProvider } from "@/components/session-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { AIAssistant } from "@/components/ai/assistant"
-import { NotificationBell } from "@/components/notifications/notification-bell"
 import { SiteHeader } from "@/components/layout/site-header"
 import { MobileLayout } from "@/components/layout/mobile-layout"
 import { useDevice } from "@/hooks/use-device"
@@ -66,10 +65,7 @@ export function RootLayoutWrapper({ children, session }: RootLayoutWrapperProps)
         ) : (
           <div className="relative flex min-h-screen w-full flex-col bg-background">
             <SiteHeader />
-            <div className="ml-auto flex items-center gap-2 fixed top-3 right-4 z-50">
-              <NotificationBell />
-            </div>
-            <main className="flex-1">
+              <main className="flex-1">
               {children}
             </main>
             <div className="fixed bottom-4 right-4 z-50">

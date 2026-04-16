@@ -1,6 +1,7 @@
 import { MainNav } from "@/components/layout/main-nav"
 import { UserNav } from "@/components/layout/user-nav"
 import { ModeToggle } from "@/components/mode-toggle"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 
 export function SiteHeader() {
   return (
@@ -8,6 +9,7 @@ export function SiteHeader() {
       <div className="flex h-14 items-center px-4 md:px-6 gap-4">
         <MainNav />
         <div className="ml-auto flex items-center gap-2">
+          <NotificationBell />
           <ModeToggle />
           <UserNav />
         </div>
