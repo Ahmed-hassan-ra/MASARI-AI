@@ -1,0 +1,208 @@
+@startuml Activity Diagram - MA$ARI-AI Finance Management
+!theme blueprint
+title MA$ARI-AI Finance Management - User Activity Flow
+
+start
+
+:User opens MA$ARI-AI application;
+
+if (User authenticated?) then (no)
+  :Navigate to login page;
+  :Enter credentials;
+  :Submit login form;
+  
+  if (Credentials valid?) then (no)
+    :Display error message;
+    stop
+  else (yes)
+    :Create user session;
+    :Store authentication token;
+  endif
+else (yes)
+  :Validate existing session;
+endif
+
+:Load personalized dashboard;
+:Display financial overview;
+
+note right
+  Dashboard shows:
+  - Total balance
+  - Monthly income/expenses
+  - Budget progress
+  - Recent transactions
+  - AI insights
+end note
+
+while (User continues using app?) is (yes)
+  
+  :User selects action;
+  
+  switch (Action type?)
+  case (Add Income)
+    :Open income form;
+    :Enter income details;
+    :Select category;
+    :Set date and amount;
+    
+    if (Is recurring income?) then (yes)
+      :Set recurrence frequency;
+    endif
+    
+    :Validate input data;
+    
+    if (Data valid?) then (no)
+      :Show validation errors;
+    else (yes)
+      :Save income to database;
+      :Update dashboard totals;
+      :Show success message;
+    endif
+    
+  case (Add Expense)
+    :Open expense form;
+    :Enter expense details;
+    :Select category;
+    :Set merchant and amount;
+    
+    if (Is recurring expense?) then (yes)
+      :Set recurrence frequency;
+    endif
+    
+    :Validate input data;
+    
+    if (Data valid?) then (no)
+      :Show validation errors;
+    else (yes)
+      :Save expense to database;
+      :Update budget tracking;
+      :Check budget limits;
+      
+      if (Budget exceeded?) then (yes)
+        :Send budget alert;
+        :Display warning notification;
+      endif
+      
+      :Update dashboard totals;
+      :Show success message;
+    endif
+    
+  case (Upload Receipt)
+    :Open receipt upload dialog;
+    :Select receipt image;
+    
+    if (Image format valid?) then (no)
+      :Show format error;
+    else (yes)
+      :Upload image to cloud storage;
+      :Process with OCR (Tesseract.js);
+      
+      fork
+        :Extract merchant name;
+      fork again
+        :Extract total amount;
+      fork again
+        :Extract date;
+      fork again
+        :Extract item details;
+      end fork
+      
+      :Parse extracted text;
+      :Auto-populate expense form;
+      :Allow user to review/edit;
+      
+      if (User confirms data?) then (yes)
+        :Save receipt and expense;
+        :Link receipt to transaction;
+        :Update dashboard;
+      else (no)
+        :Allow manual corrections;
+        :Re-submit for processing;
+      endif
+    endif
+    
+  case (Manage Budget)
+    :Open budget management;
+    :Display current budgets;
+    
+    if (Create new budget?) then (yes)
+      :Open budget creation form;
+      :Select category;
+      :Set budget amount;
+      :Choose time period;
+      :Set alert threshold;
+      :Save budget configuration;
+    else (no)
+      :Select existing budget;
+      :Modify budget settings;
+      :Update budget limits;
+    endif
+    
+    :Recalculate budget progress;
+    :Update visual indicators;
+    
+  case (View Reports)
+    :Navigate to reports section;
+    :Select report type;
+    :Choose date range;
+    
+    fork
+      :Query income data;
+    fork again
+      :Query expense data;
+    fork again
+      :Query budget data;
+    fork again
+      :Calculate trends;
+    end fork
+    
+    :Process financial analytics;
+    :Generate visualizations;
+    :Display charts and graphs;
+    
+    if (Export report?) then (yes)
+      :Generate PDF/CSV;
+      :Download report file;
+    endif
+    
+  case (AI Assistant)
+    :Open AI assistant chat;
+    :Enter financial query;
+    :Send to AI service (OpenAI/Groq);
+    :Process user's financial data;
+    :Generate personalized insights;
+    :Display AI recommendations;
+    
+    if (Accept AI suggestion?) then (yes)
+      :Apply recommended action;
+      :Update financial data;
+    endif
+    
+  case (Settings)
+    :Open settings panel;
+    :Select settings category;
+    :Configure selected settings;
+    :Save configuration changes;
+    
+  endswitch
+  
+  :Return to dashboard;
+  
+endwhile (no)
+
+:User logs out;
+:Clear session data;
+:Redirect to login page;
+
+stop
+
+note bottom
+  Key Features:
+  - Responsive design (mobile/tablet/desktop)
+  - Real-time data synchronization
+  - AI-powered insights and OCR processing
+  - Automated budget monitoring
+  - Secure authentication and data protection
+end note
+
+@enduml 

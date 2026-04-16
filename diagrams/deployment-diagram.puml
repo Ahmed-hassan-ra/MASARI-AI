@@ -1,0 +1,123 @@
+@startuml Deployment Diagram - MA$ARI-AI Finance Management
+!theme blueprint
+title MA$ARI-AI Finance Management - Deployment Architecture
+
+!define PROD_ENV #E8F5E8
+!define DEV_ENV #E3F2FD
+!define EXTERNAL_SERVICE #FFF3E0
+!define DATABASE_ENV #F3E5F5
+
+node "Client Devices" as client {
+  artifact "Web Browser" as browser
+  artifact "Mobile Browser" as mobile
+  artifact "PWA" as pwa
+  
+  browser --> mobile
+  mobile --> pwa
+}
+
+node "Development Environment" DEV_ENV {
+  artifact "Next.js Dev Server\n(localhost:3000)" as devserver
+  artifact "Local Database\n(SQLite/PostgreSQL)" as devdb
+  artifact "Environment Variables\n(.env.local)" as devenv
+  
+  devserver --> devdb
+  devserver --> devenv
+}
+
+node "Production Environment" PROD_ENV {
+  artifact "Next.js Application\n(Vercel/Netlify)" as prodapp
+  artifact "Static Assets\n(CDN)" as cdn
+  artifact "API Routes\n(Serverless Functions)" as api
+  artifact "Environment Variables\n(.env.production)" as prodenv
+  
+  prodapp --> cdn
+  prodapp --> api
+  prodapp --> prodenv
+}
+
+node "Database Infrastructure" DATABASE_ENV {
+  database "Primary Database\n(PostgreSQL/MySQL)" as maindb
+  database "Database Backups\n(Automated)" as backupdb
+  database "Connection Pooling\n(PgBouncer)" as pooling
+  
+  maindb --> backupdb
+  maindb --> pooling
+}
+
+cloud "External Services" EXTERNAL_SERVICE {
+  node "Authentication" as authcloud {
+    artifact "NextAuth.js Providers\n(Google, GitHub, etc.)" as authproviders
+  }
+  
+  node "File Storage" as storagecloud {
+    artifact "Cloudinary\n(Image Storage)" as cloudinary
+  }
+  
+  node "AI Services" as aicloud {
+    artifact "OpenAI API" as openai
+    artifact "Groq API" as groq
+  }
+  
+  node "Email Services" as emailcloud {
+    artifact "SMTP Provider\n(SendGrid, etc.)" as smtp
+  }
+  
+  node "Monitoring & Analytics" as monitoring {
+    artifact "Error Tracking\n(Sentry)" as sentry
+    artifact "Analytics\n(Vercel Analytics)" as analytics
+  }
+}
+
+node "Security Layer" as security {
+  artifact "SSL/TLS Certificates" as ssl
+  artifact "CORS Configuration" as cors
+  artifact "Rate Limiting" as ratelimit
+  artifact "Input Validation" as validation
+  
+  ssl --> cors
+  cors --> ratelimit
+  ratelimit --> validation
+}
+
+' Client connections
+client --> prodapp : "HTTPS Requests"
+client --> devserver : "HTTP Requests\n(Development)"
+
+' Production app connections
+prodapp --> maindb : "Database Queries\n(Prisma)"
+api --> maindb : "CRUD Operations"
+prodapp --> authproviders : "OAuth Authentication"
+prodapp --> cloudinary : "File Upload/Retrieval"
+prodapp --> openai : "AI Processing"
+prodapp --> groq : "AI Processing"
+prodapp --> smtp : "Email Notifications"
+prodapp --> sentry : "Error Reporting"
+prodapp --> analytics : "Usage Analytics"
+
+' Development connections
+devserver --> devdb : "Local Database\nQueries"
+devserver --> authproviders : "OAuth (Dev Keys)"
+devserver --> cloudinary : "File Upload (Dev)"
+
+' Security connections
+client --> security : "All Requests"
+security --> prodapp : "Validated Requests"
+
+' Database connections
+pooling --> maindb : "Optimized Connections"
+
+' Deployment notes
+note right of prodapp : "Auto-deployment\nfrom Git repository\nServerless architecture"
+
+note right of devserver : "Hot reloading\nFile watching\nLocal development"
+
+note right of maindb : "Production database\nACID compliance\nDaily backups"
+
+note right of authproviders : "OAuth 2.0\nJWT tokens\nSession management"
+
+note right of cloudinary : "Image optimization\nCDN distribution\nFormat conversion"
+
+note right of security : "DDoS protection\nXSS prevention\nCSRF protection"
+
+@enduml 

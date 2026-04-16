@@ -1,0 +1,94 @@
+@startuml System Architecture Diagram - MA$ARI-AI Finance Management
+!theme blueprint
+title MA$ARI-AI Finance Management - System Architecture Diagram
+
+!define FRONTEND #E1F5FE
+!define BACKEND #F3E5F5
+!define DATABASE #E8F5E8
+!define EXTERNAL #FFF3E0
+
+package "Frontend Layer" FRONTEND {
+  [React Components] as components
+  [Next.js Pages] as pages
+  [UI Components\n(Radix UI)] as ui
+  [State Management\n(React Query)] as state
+  [Styling\n(Tailwind CSS)] as styles
+  
+  components --> ui
+  pages --> components
+  components --> state
+  components --> styles
+}
+
+package "Backend Layer" BACKEND {
+  [API Routes] as api
+  [Middleware\n(Authentication)] as middleware
+  [Business Logic] as logic
+  [Data Validation\n(Zod)] as validation
+  [File Upload\nHandling] as upload
+  
+  api --> middleware
+  api --> logic
+  api --> validation
+  api --> upload
+}
+
+package "Data Layer" DATABASE {
+  [Prisma ORM] as prisma
+  [Database\n(PostgreSQL/MySQL)] as db
+  [Database Schema] as schema
+  
+  prisma --> db
+  prisma --> schema
+}
+
+package "External Services" EXTERNAL {
+  [Authentication\n(NextAuth.js)] as auth
+  [OCR Service\n(Tesseract.js)] as ocr
+  [AI Services\n(OpenAI/Groq)] as ai
+  [File Storage\n(Cloudinary)] as storage
+  [Email Service\n(Nodemailer)] as email
+}
+
+package "Security & Utils" as security {
+  [bcrypt\nPassword Hashing] as bcrypt
+  [JWT Tokens] as jwt
+  [Input Validation] as inputval
+  [CORS Protection] as cors
+}
+
+' Frontend to Backend connections
+pages --> api : "HTTP Requests"
+state --> api : "API Calls"
+
+' Backend to Data connections
+logic --> prisma : "Database Queries"
+api --> prisma : "CRUD Operations"
+
+' Backend to External Services
+middleware --> auth : "Authentication"
+upload --> storage : "File Upload"
+logic --> ocr : "Receipt Processing"
+logic --> ai : "AI Insights"
+api --> email : "Notifications"
+
+' Security connections
+api --> bcrypt : "Password Security"
+middleware --> jwt : "Token Validation"
+api --> inputval : "Data Validation"
+api --> cors : "Request Protection"
+
+' Data flow annotations
+note right of pages : "Server-Side Rendering\nStatic Generation\nClient-Side Routing"
+
+note right of api : "RESTful API\n/api/income\n/api/expenses\n/api/budgets\n/api/receipts\n/api/reports"
+
+note right of prisma : "Type-safe Database Access\nSchema Management\nMigrations"
+
+note right of auth : "OAuth Providers\nSession Management\nJWT Tokens"
+
+note right of ocr : "Receipt Text Extraction\nData Parsing\nError Handling"
+
+note bottom of db : "Relational Database\nACID Compliance\nData Integrity"
+
+@enduml 

@@ -1,0 +1,181 @@
+@startuml Entity Relationship Diagram - MA$ARI-AI Finance Management
+!theme blueprint
+title MA$ARI-AI Finance Management - Database Entity Relationship Diagram
+
+' Define entities with their attributes
+entity "User" as user {
+  + id: String (PK)
+  --
+  email: String (Unique)
+  name: String
+  image: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+entity "Account" as account {
+  + id: String (PK)
+  --
+  userId: String (FK)
+  type: String
+  provider: String
+  providerAccountId: String
+  refresh_token: String
+  access_token: String
+  expires_at: Int
+  token_type: String
+  scope: String
+  id_token: String
+  session_state: String
+}
+
+entity "Session" as session {
+  + id: String (PK)
+  --
+  sessionToken: String (Unique)
+  userId: String (FK)
+  expires: DateTime
+}
+
+entity "Income" as income {
+  + id: String (PK)
+  --
+  userId: String (FK)
+  categoryId: String (FK)
+  amount: Decimal
+  description: String
+  source: String
+  date: DateTime
+  isRecurring: Boolean
+  recurringFrequency: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+entity "Expense" as expense {
+  + id: String (PK)
+  --
+  userId: String (FK)
+  categoryId: String (FK)
+  receiptId: String (FK)
+  amount: Decimal
+  description: String
+  merchant: String
+  date: DateTime
+  paymentMethod: String
+  isRecurring: Boolean
+  recurringFrequency: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+entity "Category" as category {
+  + id: String (PK)
+  --
+  name: String
+  type: Enum (INCOME/EXPENSE)
+  color: String
+  icon: String
+  isCustom: Boolean
+  userId: String (FK)
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+entity "Budget" as budget {
+  + id: String (PK)
+  --
+  userId: String (FK)
+  categoryId: String (FK)
+  name: String
+  amount: Decimal
+  spent: Decimal
+  period: Enum (MONTHLY/YEARLY)
+  startDate: DateTime
+  endDate: DateTime
+  alertThreshold: Decimal
+  isActive: Boolean
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+entity "Receipt" as receipt {
+  + id: String (PK)
+  --
+  userId: String (FK)
+  imageUrl: String
+  originalText: String
+  parsedData: Json
+  merchant: String
+  totalAmount: Decimal
+  date: DateTime
+  status: Enum (PENDING/PROCESSED/FAILED)
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+entity "Goal" as goal {
+  + id: String (PK)
+  --
+  userId: String (FK)
+  name: String
+  description: String
+  targetAmount: Decimal
+  currentAmount: Decimal
+  targetDate: DateTime
+  category: String
+  priority: Enum (LOW/MEDIUM/HIGH)
+  status: Enum (ACTIVE/COMPLETED/PAUSED)
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+entity "Transaction" as transaction {
+  + id: String (PK)
+  --
+  userId: String (FK)
+  type: Enum (INCOME/EXPENSE)
+  amount: Decimal
+  description: String
+  categoryId: String (FK)
+  date: DateTime
+  reference: String
+  status: Enum (PENDING/COMPLETED/FAILED)
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+entity "Notification" as notification {
+  + id: String (PK)
+  --
+  userId: String (FK)
+  title: String
+  message: String
+  type: Enum (BUDGET_ALERT/GOAL_UPDATE/SYSTEM)
+  isRead: Boolean
+  createdAt: DateTime
+  readAt: DateTime
+}
+
+' Define relationships
+user ||--o{ account : "has many"
+user ||--o{ session : "has many"
+user ||--o{ income : "has many"
+user ||--o{ expense : "has many"
+user ||--o{ category : "creates"
+user ||--o{ budget : "sets"
+user ||--o{ receipt : "uploads"
+user ||--o{ goal : "sets"
+user ||--o{ transaction : "makes"
+user ||--o{ notification : "receives"
+
+category ||--o{ income : "categorizes"
+category ||--o{ expense : "categorizes"
+category ||--o{ budget : "applies to"
+category ||--o{ transaction : "categorizes"
+
+receipt ||--o{ expense : "generates"
+
+budget }o--|| category : "monitors"
+
+@enduml 

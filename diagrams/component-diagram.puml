@@ -1,0 +1,164 @@
+@startuml Component Diagram - MA$ARI-AI Finance Management
+!theme blueprint
+title MA$ARI-AI Finance Management - React Component Architecture
+
+!define UI_COMPONENT #E3F2FD
+!define PAGE_COMPONENT #F1F8E9
+!define LAYOUT_COMPONENT #FFF8E1
+!define FEATURE_COMPONENT #FCE4EC
+
+package "Layout Components" LAYOUT_COMPONENT {
+  [RootLayout] as root
+  [UserNav] as usernav
+  [Sidebar] as sidebar
+  [MobileNavigation] as mobilenav
+  [Header] as header
+  
+  root --> usernav
+  root --> sidebar
+  root --> mobilenav
+  root --> header
+}
+
+package "Page Components" PAGE_COMPONENT {
+  [Dashboard] as dashboard
+  [IncomePage] as income
+  [ExpensePage] as expense
+  [BudgetPage] as budget
+  [ReceiptPage] as receipt
+  [ReportPage] as report
+  [SettingsPage] as settings
+  [MobileDashboard] as mobiledashboard
+}
+
+package "Feature Components" FEATURE_COMPONENT {
+  [Overview] as overview
+  [RecentTransactions] as transactions
+  [BudgetProgress] as budgetprogress
+  [AIInsights] as aiinsights
+  [BudgetOptimizer] as optimizer
+  [AddTransactionDialog] as addtransaction
+  [IncomeForm] as incomeform
+  [ExpenseForm] as expenseform
+  [BudgetForm] as budgetform
+  [ReceiptUpload] as receiptupload
+  [OCRProcessor] as ocrprocessor
+  [ReportGenerator] as reportgen
+  [ChartComponents] as charts
+}
+
+package "UI Components (Radix UI)" UI_COMPONENT {
+  [Button] as button
+  [Card] as card
+  [Dialog] as dialog
+  [Form] as form
+  [Input] as input
+  [Select] as select
+  [DatePicker] as datepicker
+  [Toast] as toast
+  [Progress] as progress
+  [Table] as table
+  [Tabs] as tabs
+  [Alert] as alert
+}
+
+package "Hooks & Utils" as hooks {
+  [useDevice] as usedevice
+  [useAuth] as useauth
+  [useTransactions] as usetransactions
+  [useBudgets] as usebudgets
+  [useReceipts] as usereceipts
+  [useReports] as usereports
+}
+
+package "Providers & Context" as providers {
+  [QueryProvider] as queryprov
+  [ThemeProvider] as themeprov
+  [AuthProvider] as authprov
+}
+
+' Layout relationships
+root --> dashboard
+root --> income
+root --> expense
+root --> budget
+root --> receipt
+root --> report
+root --> settings
+root --> mobiledashboard
+
+' Dashboard dependencies
+dashboard --> overview
+dashboard --> transactions
+dashboard --> budgetprogress
+dashboard --> aiinsights
+dashboard --> optimizer
+dashboard --> addtransaction
+
+' Feature component dependencies
+income --> incomeform
+expense --> expenseform
+budget --> budgetform
+receipt --> receiptupload
+receipt --> ocrprocessor
+report --> reportgen
+report --> charts
+
+addtransaction --> incomeform
+addtransaction --> expenseform
+
+' UI component usage
+incomeform --> form
+incomeform --> input
+incomeform --> select
+incomeform --> datepicker
+incomeform --> button
+
+expenseform --> form
+expenseform --> input
+expenseform --> select
+expenseform --> datepicker
+expenseform --> button
+
+budgetform --> form
+budgetform --> input
+budgetform --> select
+budgetform --> progress
+budgetform --> button
+
+receiptupload --> dialog
+receiptupload --> button
+receiptupload --> alert
+
+overview --> card
+transactions --> table
+budgetprogress --> progress
+charts --> card
+
+addtransaction --> dialog
+
+' Hook usage
+dashboard --> usedevice
+dashboard --> usetransactions
+income --> usetransactions
+expense --> usetransactions
+budget --> usebudgets
+receipt --> usereceipts
+report --> usereports
+
+root --> useauth
+
+' Provider dependencies
+root --> queryprov
+root --> themeprov
+root --> authprov
+
+note right of dashboard : "Main dashboard with\nresponsive design\nfor mobile/tablet/desktop"
+
+note right of ocrprocessor : "Processes receipt images\nusing Tesseract.js\nExtracts transaction data"
+
+note right of aiinsights : "AI-powered financial\ninsights and recommendations\nUsing OpenAI/Groq APIs"
+
+note right of usedevice : "Custom hook for\nresponsive design\nDetects screen size"
+
+@enduml 

@@ -1,0 +1,80 @@
+@startuml Sequence Diagram - MA$ARI-AI Finance Management
+!theme blueprint
+title MA$ARI-AI Finance Management - Key Operations Sequence Diagram
+
+actor User
+participant "Frontend\n(Next.js)" as Frontend
+participant "Middleware" as Middleware
+participant "API Routes" as API
+participant "Database\n(Prisma)" as DB
+participant "AI/OCR\nService" as OCR
+participant "Auth\nProvider" as Auth
+
+== User Authentication Flow ==
+User -> Frontend: Login Request
+Frontend -> Auth: Authenticate User
+Auth -> Auth: Validate Credentials
+Auth -> Frontend: Return Auth Token
+Frontend -> API: Request with Token
+API -> Middleware: Validate Token
+Middleware -> API: Token Valid
+API -> DB: Fetch User Data
+DB -> API: Return User Profile
+API -> Frontend: User Session Data
+Frontend -> User: Dashboard Display
+
+== Add Transaction Flow ==
+User -> Frontend: Add New Transaction
+Frontend -> Frontend: Validate Input Data
+Frontend -> API: POST /api/expenses or /api/income
+API -> Middleware: Authenticate Request
+Middleware -> API: User Authorized
+API -> DB: INSERT Transaction
+DB -> API: Transaction Created
+API -> Frontend: Success Response
+Frontend -> Frontend: Update UI State
+Frontend -> User: Show Success Message
+
+== OCR Receipt Processing Flow ==
+User -> Frontend: Upload Receipt Image
+Frontend -> Frontend: Validate Image Format
+Frontend -> API: POST /api/receipts/upload
+API -> Middleware: Authenticate Request
+Middleware -> API: User Authorized
+API -> OCR: Process Image with Tesseract.js
+OCR -> OCR: Extract Text Data
+OCR -> API: Return Extracted Data
+API -> API: Parse Receipt Information
+API -> DB: INSERT Receipt & Transaction
+DB -> API: Data Saved Successfully
+API -> Frontend: Receipt Data Response
+Frontend -> Frontend: Display Extracted Data
+Frontend -> User: Show Receipt Details
+
+== Generate Reports Flow ==
+User -> Frontend: Request Financial Report
+Frontend -> API: GET /api/reports/data
+API -> Middleware: Authenticate Request
+Middleware -> API: User Authorized
+API -> DB: Query Income Data
+API -> DB: Query Expense Data
+API -> DB: Query Budget Data
+DB -> API: Return Financial Data
+API -> API: Process & Calculate Analytics
+API -> Frontend: Report Data
+Frontend -> Frontend: Generate Charts/Visualizations
+Frontend -> User: Display Financial Report
+
+== Budget Alert Flow ==
+DB -> API: Trigger Budget Check (Scheduled)
+API -> DB: Query Current Spending
+DB -> API: Return Spending Data
+API -> API: Calculate Budget Usage
+alt Budget Exceeded
+    API -> Frontend: Send Alert Notification
+    Frontend -> User: Display Budget Warning
+else Budget Normal
+    API -> API: Continue Monitoring
+end
+
+@enduml 
