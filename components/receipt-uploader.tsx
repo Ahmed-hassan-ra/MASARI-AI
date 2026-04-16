@@ -521,6 +521,12 @@ export function ReceiptUploader() {
           </TabsList>
 
           <TabsContent value="upload" className="space-y-4 mt-4">
+            {uploadError && !extractedReceipt && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{uploadError}</AlertDescription>
+              </Alert>
+            )}
             {!extractedReceipt && (
               <div
                 className={cn(
