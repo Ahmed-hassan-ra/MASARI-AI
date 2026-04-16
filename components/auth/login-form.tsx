@@ -60,17 +60,8 @@ export function LoginForm() {
     }
   }
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      await signIn("google", { callbackUrl: "/dashboard" })
-    } catch (error) {
-      setError("An error occurred during Google sign in")
-      console.error("Google sign in error:", error)
-      setIsLoading(false)
-    }
+  const handleGoogleSignIn = () => {
+    window.location.href = "/api/auth/signin/google?callbackUrl=/dashboard"
   }
 
   return (
