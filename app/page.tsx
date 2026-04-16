@@ -521,7 +521,7 @@ export default function LandingPage() {
         >
           <span className="text-slate-900 dark:text-white">Streamline your</span><br />
           <span
-            className="bg-clip-text text-transparent"
+            className="bg-clip-text text-transparent inline-block pr-1"
             style={{
               backgroundImage: `linear-gradient(90deg, ${C.deep}, ${C.primary}, ${C.icy})`,
             }}
@@ -573,7 +573,7 @@ export default function LandingPage() {
             className="text-center mb-16">
             <p className="text-sm font-semibold mb-3 uppercase tracking-widest" style={{ color: C.primary }}>Features</p>
             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white">Everything you need to manage</h2>
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-200 dark:text-slate-700">your money in one place</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-400 dark:text-slate-500">your money in one place</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-4">
