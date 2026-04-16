@@ -523,21 +523,11 @@ export function ReceiptUploader() {
                 ) : isProcessing ? (
                   <div className="flex flex-col items-center gap-4">
                     <Loader2 className="h-10 w-10 text-primary animate-spin" />
-                    <p className="text-lg font-medium">🧠 Processing with Intelligent OCR...</p>
-                    <p className="text-sm text-muted-foreground">{processingStatus}</p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        Google Vision
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                        OCR.space
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-                        Tesseract
-                      </div>
+                    <p className="text-lg font-medium">Reading your receipt...</p>
+                    <p className="text-sm text-muted-foreground">Analyzing with Groq Vision AI</p>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                      This usually takes 5–10 seconds
                     </div>
                   </div>
                 ) : previewImage ? (

@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { createWorker } from "tesseract.js"
-import { groqJSON } from "@/lib/groq"
 
 interface ReceiptItem {
   name: string
@@ -37,128 +35,7 @@ interface ParsedReceipt {
   rawText: string
 }
 
-export async function POST(req: Request) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const body = await req.json()
-    const { imageBase64 } = body
-
-    if (!imageBase64) {
-      return NextResponse.json({ error: "No image provided" }, { status: 400 })
-    }
-
-    // Step 1: Extract text from image
-    let extractedText = ""
-    let ocrProvider = ""
-
-    if (process.env.GOOGLE_VISION_API_KEY) {
-      const result = await tryGoogleVision(imageBase64)
-      if (result.success) {
-        extractedText = result.text
-        ocrProvider = "google-vision"
-      }
-    }
-
-    if (!extractedText) {
-      const result = await tryTesseract(imageBase64)
-      if (result.success) {
-        extractedText = result.text
-        ocrProvider = "tesseract"
-      }
-    }
-
-    if (!extractedText) {
-      return NextResponse.json(
-        { error: "Could not extract text from image. Try a clearer photo with better lighting." },
-        { status: 422 }
-      )
-    }
-
-    // Step 2: Parse extracted text into structured receipt data
-    const parsedReceipt = await parseReceiptWithAI(extractedText)
-
-    return NextResponse.json({
-      success: true,
-      extractedText,
-      parsedReceipt,
-      ocrProvider,
-      confidence: parsedReceipt.confidence,
-      itemCount: parsedReceipt.items.length,
-    })
-  } catch (error) {
-    console.error("[OCR_POST]", error)
-    return NextResponse.json(
-      { error: "Failed to process receipt image" },
-      { status: 500 }
-    )
-  }
-}
-
-// ─── OCR Providers ────────────────────────────────────────────────────────────
-
-async function tryGoogleVision(imageBase64: string): Promise<{ success: boolean; text: string }> {
-  try {
-    const apiKey = process.env.GOOGLE_VISION_API_KEY!
-    const base64Data = imageBase64.replace(/^data:image\/[a-z]+;base64,/, "")
-
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 15_000)
-
-    const response = await fetch(
-      `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requests: [
-            {
-              image: { content: base64Data },
-              features: [{ type: "DOCUMENT_TEXT_DETECTION", maxResults: 1 }],
-            },
-          ],
-        }),
-        signal: controller.signal,
-      }
-    )
-
-    clearTimeout(timeout)
-
-    if (!response.ok) return { success: false, text: "" }
-
-    const data = await response.json()
-    const text: string = data.responses?.[0]?.fullTextAnnotation?.text ?? ""
-    return { success: !!text, text }
-  } catch {
-    return { success: false, text: "" }
-  }
-}
-
-async function tryTesseract(imageBase64: string): Promise<{ success: boolean; text: string }> {
-  let worker
-  try {
-    worker = await createWorker("eng")
-    const { data } = await worker.recognize(imageBase64)
-    const text = data.text.trim()
-    return { success: !!text, text }
-  } catch (error) {
-    console.error("[TESSERACT]", error)
-    return { success: false, text: "" }
-  } finally {
-    await worker?.terminate()
-  }
-}
-
-// ─── AI Parsing ───────────────────────────────────────────────────────────────
-
-const PARSE_PROMPT = (text: string) => `
-You are a receipt parser. Extract structured data from this receipt text and return ONLY valid JSON with no extra text.
-
-RECEIPT TEXT:
-${text}
+const RECEIPT_PROMPT = `You are a receipt parser. Look at this receipt image and extract all the data, then return ONLY a valid JSON object with no extra text or markdown.
 
 Return this exact JSON structure:
 {
@@ -172,6 +49,7 @@ Return this exact JSON structure:
   "tax": 0.00,
   "tip": 0.00,
   "discount": 0.00,
+  "rawText": "the full text you can read from the receipt",
   "items": [
     {
       "name": "Item name",
@@ -192,51 +70,131 @@ Return this exact JSON structure:
 }
 
 Rules:
-- Use null for missing optional fields, not empty strings
-- Extract ALL line items with their prices
-- If a field cannot be determined, use a sensible default (0 for numbers, "Unknown" for strings)
-- confidence should reflect how clearly the value was readable (0.0 to 1.0)
-`.trim()
+- Use null for missing optional fields
+- Extract ALL visible line items
+- confidence should reflect how clearly each value was readable (0.0 to 1.0)
+- Return ONLY the JSON object, no other text`
 
-async function parseReceiptWithAI(text: string): Promise<ParsedReceipt> {
-  if (process.env.GROQ_API_KEY) {
-    const result = await parseWithGroq(text)
-    if (result) return { ...result, rawText: text }
-  }
-
-  // Last resort: extract just the essentials with regex
-  return basicFallbackParser(text)
-}
-
-async function parseWithGroq(text: string): Promise<Omit<ParsedReceipt, "rawText"> | null> {
+export async function POST(req: Request) {
   try {
-    const content = await groqJSON(
-      [{ role: "user", content: PARSE_PROMPT(text) }],
-      { temperature: 0.1, max_tokens: 2000 }
-    )
-    return normaliseAIParsedData(JSON.parse(content))
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const apiKey = process.env.GROQ_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({ error: "AI service not configured" }, { status: 503 })
+    }
+
+    const body = await req.json()
+    const { imageBase64 } = body
+
+    if (!imageBase64) {
+      return NextResponse.json({ error: "No image provided" }, { status: 400 })
+    }
+
+    // Strip data URL prefix if present
+    const base64Data = imageBase64.replace(/^data:image\/[a-z]+;base64,/, "")
+    const mimeType = imageBase64.startsWith("data:image/png") ? "image/png" : "image/jpeg"
+
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.2-11b-vision-preview",
+        temperature: 0.1,
+        max_tokens: 2000,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${mimeType};base64,${base64Data}`,
+                },
+              },
+              {
+                type: "text",
+                text: RECEIPT_PROMPT,
+              },
+            ],
+          },
+        ],
+      }),
+    })
+
+    if (!response.ok) {
+      const err = await response.text()
+      console.error("[OCR_GROQ]", err)
+      return NextResponse.json(
+        { error: "Failed to process receipt image. Please try again." },
+        { status: 500 }
+      )
+    }
+
+    const data = await response.json()
+    const content = data?.choices?.[0]?.message?.content
+
+    if (!content) {
+      return NextResponse.json(
+        { error: "Could not read the receipt. Try a clearer photo with better lighting." },
+        { status: 422 }
+      )
+    }
+
+    // Strip any accidental markdown code fences
+    const clean = content.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim()
+
+    let parsed: any
+    try {
+      parsed = JSON.parse(clean)
+    } catch {
+      console.error("[OCR_PARSE] Failed to parse JSON:", clean)
+      return NextResponse.json(
+        { error: "Could not parse receipt data. Try a clearer photo." },
+        { status: 422 }
+      )
+    }
+
+    const parsedReceipt = normalise(parsed)
+
+    return NextResponse.json({
+      success: true,
+      extractedText: parsedReceipt.rawText,
+      parsedReceipt,
+      ocrProvider: "groq-vision",
+      confidence: parsedReceipt.confidence,
+      itemCount: parsedReceipt.items.length,
+    })
   } catch (error) {
-    console.error("[GROQ_PARSE]", error)
-    return null
+    console.error("[OCR_POST]", error)
+    return NextResponse.json(
+      { error: "Failed to process receipt image" },
+      { status: 500 }
+    )
   }
 }
 
-// ─── Data Normalisation ───────────────────────────────────────────────────────
-
-function normaliseAIParsedData(parsed: any): Omit<ParsedReceipt, "rawText"> {
+function normalise(p: any): ParsedReceipt {
   return {
-    merchant: parsed.merchant || "Unknown Merchant",
-    address: parsed.address ?? undefined,
-    phone: parsed.phone ?? undefined,
-    date: isValidDate(parsed.date) ? parsed.date : today(),
-    time: parsed.time ?? undefined,
-    total: toFloat(parsed.total),
-    subtotal: toFloat(parsed.subtotal) || undefined,
-    tax: toFloat(parsed.tax) || undefined,
-    tip: toFloat(parsed.tip) || undefined,
-    discount: toFloat(parsed.discount) || undefined,
-    items: Array.isArray(parsed.items)
-      ? parsed.items.map((item: any) => ({
+    merchant: p.merchant || "Unknown Merchant",
+    address: p.address ?? undefined,
+    phone: p.phone ?? undefined,
+    date: isValidDate(p.date) ? p.date : today(),
+    time: p.time ?? undefined,
+    total: toFloat(p.total),
+    subtotal: toFloat(p.subtotal) || undefined,
+    tax: toFloat(p.tax) || undefined,
+    tip: toFloat(p.tip) || undefined,
+    discount: toFloat(p.discount) || undefined,
+    rawText: p.rawText || "",
+    items: Array.isArray(p.items)
+      ? p.items.map((item: any) => ({
           name: item.name || "Unknown Item",
           price: toFloat(item.price),
           quantity: parseInt(item.quantity) || 1,
@@ -245,60 +203,15 @@ function normaliseAIParsedData(parsed: any): Omit<ParsedReceipt, "rawText"> {
         }))
       : [],
     paymentMethod: {
-      method: parsed.paymentMethod?.method || "Unknown",
-      lastFourDigits: parsed.paymentMethod?.lastFourDigits ?? undefined,
-      amount: toFloat(parsed.paymentMethod?.amount),
-      confidence: toFloat(parsed.paymentMethod?.confidence) || 0.7,
+      method: p.paymentMethod?.method || "Unknown",
+      lastFourDigits: p.paymentMethod?.lastFourDigits ?? undefined,
+      amount: toFloat(p.paymentMethod?.amount),
+      confidence: toFloat(p.paymentMethod?.confidence) || 0.7,
     },
-    category: parsed.category || "Other",
-    confidence: toFloat(parsed.confidence) || 0.5,
+    category: p.category || "Other",
+    confidence: toFloat(p.confidence) || 0.5,
   }
 }
-
-// ─── Basic Fallback (no AI key) ───────────────────────────────────────────────
-
-function basicFallbackParser(text: string): ParsedReceipt {
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean)
-
-  // Total — largest dollar amount labelled total/amount/due
-  let total = 0
-  for (const line of lines) {
-    if (/total|amount due|balance due/i.test(line)) {
-      const match = line.match(/(\d+\.\d{2})/)
-      if (match) total = Math.max(total, parseFloat(match[1]))
-    }
-  }
-
-  // Date
-  let date = today()
-  for (const line of lines) {
-    const match = line.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/)
-    if (match) {
-      const [, m, d, y] = match
-      const year = y.length === 2 ? "20" + y : y
-      date = `${year}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`
-      break
-    }
-  }
-
-  // Merchant — first non-empty line that isn't a number or address
-  const merchant = lines.find(
-    (l) => l.length > 3 && !/^\d/.test(l) && !/receipt|tax|total/i.test(l)
-  ) || "Unknown Merchant"
-
-  return {
-    merchant,
-    date,
-    total,
-    items: [],
-    paymentMethod: { method: "Unknown", amount: 0, confidence: 0.2 },
-    category: "Other",
-    confidence: 0.3,
-    rawText: text,
-  }
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function toFloat(value: any): number {
   const n = parseFloat(value)
