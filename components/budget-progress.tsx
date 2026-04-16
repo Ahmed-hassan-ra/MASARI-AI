@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { PlusCircle } from "lucide-react"
+import { useCurrency } from "@/lib/currency-context"
 
 interface BudgetCategory {
   name: string
@@ -21,6 +22,7 @@ interface Budget {
 export function BudgetProgress() {
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [loading, setLoading] = useState(true)
+  const { formatCurrency } = useCurrency()
 
   useEffect(() => {
     fetch("/api/budgets")
@@ -81,7 +83,7 @@ export function BudgetProgress() {
             <div className="space-y-0.5">
               <p className="text-sm font-medium leading-none">{item.category}</p>
               <p className="text-xs text-muted-foreground">
-                ${item.spent.toFixed(0)} of ${item.total.toFixed(0)}
+                {formatCurrency(item.spent)} of {formatCurrency(item.total)}
               </p>
             </div>
             <div className="text-sm font-medium">{item.percentage}%</div>

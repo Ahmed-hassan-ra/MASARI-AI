@@ -2,6 +2,8 @@
 
 import { ThemeProvider } from "@/components/theme-provider"
 import { SessionProvider } from "@/components/session-provider"
+import { ThemeSync } from "@/components/theme-sync"
+import { CurrencyProvider } from "@/lib/currency-context"
 import { Toaster } from "@/components/ui/toaster"
 import { AIAssistant } from "@/components/ai/assistant"
 import { SiteHeader } from "@/components/layout/site-header"
@@ -30,7 +32,7 @@ export function RootLayoutWrapper({ children, session }: RootLayoutWrapperProps)
   if (isPublicPage) {
     return (
       <SessionProvider session={session}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
           <Toaster />
         </ThemeProvider>
@@ -42,7 +44,7 @@ export function RootLayoutWrapper({ children, session }: RootLayoutWrapperProps)
   if (!mounted) {
     return (
       <SessionProvider session={session}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <div className="relative flex min-h-screen w-full flex-col bg-background">
             <SiteHeader />
             <main className="flex-1">
@@ -57,23 +59,26 @@ export function RootLayoutWrapper({ children, session }: RootLayoutWrapperProps)
 
   return (
     <SessionProvider session={session}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-        {device.isMobile ? (
-          <MobileLayout>
-            {children}
-          </MobileLayout>
-        ) : (
-          <div className="relative flex min-h-screen w-full flex-col bg-background">
-            <SiteHeader />
-              <main className="flex-1">
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <CurrencyProvider>
+          <ThemeSync />
+          {device.isMobile ? (
+            <MobileLayout>
               {children}
-            </main>
-            <div className="fixed bottom-4 right-4 z-50">
-              <AIAssistant />
+            </MobileLayout>
+          ) : (
+            <div className="relative flex min-h-screen w-full flex-col bg-background">
+              <SiteHeader />
+              <main className="flex-1">
+                {children}
+              </main>
+              <div className="fixed bottom-4 right-4 z-50">
+                <AIAssistant />
+              </div>
             </div>
-          </div>
-        )}
-        <Toaster />
+          )}
+          <Toaster />
+        </CurrencyProvider>
       </ThemeProvider>
     </SessionProvider>
   )

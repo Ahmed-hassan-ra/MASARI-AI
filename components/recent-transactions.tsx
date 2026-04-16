@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Loader2, PlusCircle } from "lucide-react"
 import Link from "next/link"
+import { useCurrency } from "@/lib/currency-context"
 
 interface Transaction {
   id: string
@@ -19,6 +20,7 @@ interface Transaction {
 export function RecentTransactions({ refreshKey }: { refreshKey?: number }) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
+  const { formatCurrency } = useCurrency()
 
   useEffect(() => {
     async function fetchTransactions() {
@@ -81,7 +83,7 @@ export function RecentTransactions({ refreshKey }: { refreshKey?: number }) {
             </p>
           </div>
           <Badge variant={transaction.type === "expense" ? "destructive" : "default"} className="ml-2 shrink-0">
-            {transaction.type === "expense" ? "-" : "+"}${transaction.amount.toFixed(2)}
+            {transaction.type === "expense" ? "-" : "+"}{formatCurrency(transaction.amount)}
           </Badge>
         </div>
       ))}

@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DollarSign, Download, Loader2 } from "lucide-react"
+import { useCurrency } from "@/lib/currency-context"
 import { CashFlowChart } from "@/components/cash-flow-chart"
 import { ExpenseTrendChart } from "@/components/expense-trend-chart"
 import { SavingsGoalChart } from "@/components/savings-goal-chart"
@@ -48,7 +49,8 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState("month")
   const [refreshKey, setRefreshKey] = useState(0)
-  
+  const { formatCurrency } = useCurrency()
+
   // Month selector state
   const currentDate = new Date()
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth())
@@ -143,13 +145,6 @@ export default function ReportsPage() {
         variant: "destructive",
       })
     }
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount)
   }
 
   const formatPercentage = (value: number) => {

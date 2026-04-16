@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Edit, Trash2, Loader2, PlusCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
+import { useCurrency } from "@/lib/currency-context"
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -40,6 +41,7 @@ export function ExpenseList({ filter, refreshKey, selectedMonth, selectedYear, o
   const [editForm, setEditForm] = useState({ description: "", amount: "", category: "", date: "" })
   const [isSaving, setIsSaving] = useState(false)
   const { toast } = useToast()
+  const { formatCurrency } = useCurrency()
 
   useEffect(() => {
     fetchExpenses()
@@ -181,7 +183,7 @@ export function ExpenseList({ filter, refreshKey, selectedMonth, selectedYear, o
               </TableCell>
               <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
               <TableCell className="text-right font-medium text-red-500">
-                -${expense.amount.toFixed(2)}
+                -{formatCurrency(expense.amount)}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-1">
@@ -200,7 +202,7 @@ export function ExpenseList({ filter, refreshKey, selectedMonth, selectedYear, o
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Expense</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Delete <strong>{expense.description}</strong> (${expense.amount.toFixed(2)})? This cannot be undone.
+                          Delete <strong>{expense.description}</strong> ({formatCurrency(expense.amount)})? This cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

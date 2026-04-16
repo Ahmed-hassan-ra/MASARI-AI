@@ -5,6 +5,7 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } fro
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { PlusCircle } from "lucide-react"
+import { useCurrency } from "@/lib/currency-context"
 
 interface ChartData {
   name: string
@@ -16,6 +17,7 @@ export function Overview() {
   const [data, setData] = useState<ChartData[]>([])
   const [loading, setLoading] = useState(true)
   const [hasData, setHasData] = useState(false)
+  const { formatCompact } = useCurrency()
 
   useEffect(() => {
     fetch("/api/reports/chart-data")
@@ -59,8 +61,8 @@ export function Overview() {
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>
         <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-        <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} />
-        <Tooltip formatter={(value) => [`$${value}`, ""]} labelFormatter={label => `Month: ${label}`} />
+        <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={v => formatCompact(v as number)} />
+        <Tooltip formatter={(value) => [formatCompact(value as number), ""]} labelFormatter={label => `Month: ${label}`} />
         <Legend />
         <Bar dataKey="income" name="Income" fill="#2D82B5" radius={[4, 4, 0, 0]} />
         <Bar dataKey="expenses" name="Expenses" fill="#f87171" radius={[4, 4, 0, 0]} />

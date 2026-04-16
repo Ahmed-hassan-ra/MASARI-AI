@@ -10,6 +10,7 @@ import { AddTransactionDialog } from "@/components/add-transaction-dialog"
 import { AIInsights } from "@/components/ai-insights"
 import { BudgetOptimizer } from "@/components/budget-optimizer"
 import { DollarSign, CreditCard, Wallet, BarChart3, Receipt } from "lucide-react"
+import { useCurrency } from "@/lib/currency-context"
 import { useDevice } from "@/hooks/use-device"
 import { MobileDashboard } from "@/components/mobile/mobile-dashboard"
 import Link from "next/link"
@@ -35,6 +36,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [refreshTransactions, setRefreshTransactions] = useState(0)
   const device = useDevice()
+  const { formatCurrency } = useCurrency()
 
   const handleTransactionAdded = () => {
     setRefreshTransactions((prev) => prev + 1)
@@ -104,7 +106,7 @@ export default function Dashboard() {
                   ? "—"
                   : card.isPercentage
                   ? `${card.value.toFixed(1)}%`
-                  : `$${card.value.toFixed(2)}`}
+                  : formatCurrency(card.value)}
               </div>
               {card.change !== null && !loading && (
                 <p className="text-xs text-muted-foreground mt-1">

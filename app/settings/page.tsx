@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -30,6 +31,7 @@ export default function SettingsPage() {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
   const { toast } = useToast()
   const router = useRouter()
+  const { setTheme } = useTheme()
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsFormSchema),
@@ -82,6 +84,7 @@ export default function SettingsPage() {
         return
       }
       if (!res.ok) throw new Error()
+      setTheme(data.theme)
       toast({ title: "Settings saved" })
     } catch {
       toast({ title: "Error", description: "Failed to save settings", variant: "destructive" })
