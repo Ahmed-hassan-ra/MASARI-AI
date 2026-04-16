@@ -1,13 +1,12 @@
 "use client"
 
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { DollarSign, PlusCircle, Wallet, AlertCircle, BarChart3, CreditCard, Receipt, Target, TrendingUp, TrendingDown, Edit, Trash2, Calendar } from "lucide-react"
+import { DollarSign, PlusCircle, AlertCircle, Target, TrendingUp, TrendingDown, Edit, Trash2, Calendar } from "lucide-react"
 import { BudgetTemplates } from "@/components/budgets/budget-templates"
 import { CreateBudgetDialog } from "@/components/budgets/create-budget-dialog"
 import { MonthSelector } from "@/components/month-selector"
@@ -332,81 +331,17 @@ export default function BudgetsPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen w-full flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-          <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-            <Wallet className="h-6 w-6" />
-            <span>MA$ARI-AI</span>
-          </Link>
-        </header>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading budgets...</p>
-          </div>
+      <main className="flex flex-1 items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading budgets...</p>
         </div>
-      </div>
+      </main>
     )
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <Wallet className="h-6 w-6" />
-          <span>MA$ARI-AI</span>
-        </Link>
-        <nav className="ml-auto flex gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/simple-settings">Settings</Link>
-          </Button>
-        </nav>
-      </header>
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <aside className="hidden w-48 flex-col border-r bg-background sm:flex">
-          <nav className="flex flex-1 flex-col gap-2 px-2 py-4">
-            <Button variant="ghost" className="justify-start" asChild>
-              <Link href="/dashboard">
-                <Wallet className="mr-2 h-4 w-4" />
-                Dashboard
-              </Link>
-            </Button>
-            <Button variant="default" className="justify-start" asChild>
-              <Link href="/budgets">
-                <BarChart3 className="mr-2 h-4 w-4" />
-                Budgets
-              </Link>
-            </Button>
-            <Button variant="ghost" className="justify-start" asChild>
-              <Link href="/expenses">
-                <CreditCard className="mr-2 h-4 w-4" />
-                Expenses
-              </Link>
-            </Button>
-            <Button variant="ghost" className="justify-start" asChild>
-              <Link href="/income">
-                <DollarSign className="mr-2 h-4 w-4" />
-                Income
-              </Link>
-            </Button>
-            <Button variant="ghost" className="justify-start" asChild>
-              <Link href="/receipts">
-                <Receipt className="mr-2 h-4 w-4" />
-                Receipts
-              </Link>
-            </Button>
-            <Button variant="ghost" className="justify-start" asChild>
-              <Link href="/reports">
-                <BarChart3 className="mr-2 h-4 w-4" />
-                Reports
-              </Link>
-            </Button>
-          </nav>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-semibold">Budget Management</h1>
@@ -861,8 +796,6 @@ export default function BudgetsPage() {
               )}
             </DialogContent>
           </Dialog>
-        </main>
-      </div>
-    </div>
+    </main>
   )
 }

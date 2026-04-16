@@ -49,7 +49,7 @@ export function MobileDashboard() {
         <div className="flex-1">
           <AddTransactionDialog onTransactionAdded={fetchDashboardData} />
         </div>
-        <Link href="/simple-settings">
+        <Link href="/settings">
           <Button variant="outline" size="lg" className="h-12 px-4">
             <Settings className="h-5 w-5" />
           </Button>
