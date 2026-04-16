@@ -1,58 +1,94 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { PlusCircle } from "lucide-react"
+
+interface BudgetCategory {
+  name: string
+  amount: number
+  spent: number
+}
+
+interface Budget {
+  id: string
+  name: string
+  categories: BudgetCategory[]
+}
 
 export function BudgetProgress() {
+  const [budgets, setBudgets] = useState<Budget[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch("/api/budgets")
+      .then((r) => r.json())
+      .then((data) => {
+        setBudgets(Array.isArray(data) ? data : [])
+      })
+      .catch(() => setBudgets([]))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="space-y-2 animate-pulse">
+            <div className="flex justify-between">
+              <div className="h-3 w-28 rounded bg-muted" />
+              <div className="h-3 w-8 rounded bg-muted" />
+            </div>
+            <div className="h-2 w-full rounded bg-muted" />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Flatten all categories across all budgets
+  const allCategories = budgets.flatMap((b) =>
+    b.categories.map((c) => ({
+      budgetName: b.name,
+      category: c.name,
+      spent: c.spent ?? 0,
+      total: c.amount,
+      percentage: c.amount > 0 ? Math.min(Math.round((c.spent / c.amount) * 100), 100) : 0,
+    }))
+  )
+
+  if (allCategories.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+        <p className="text-sm text-muted-foreground">No budgets set up yet.</p>
+        <Button asChild size="sm" variant="outline">
+          <Link href="/budgets">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create your first budget
+          </Link>
+        </Button>
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-8">
-      {budgets.map((budget) => (
-        <div key={budget.category} className="space-y-2">
+    <div className="space-y-6">
+      {allCategories.map((item, i) => (
+        <div key={i} className="space-y-2">
           <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-sm font-medium leading-none">{budget.category}</p>
-              <p className="text-sm text-muted-foreground">
-                ${budget.spent} of ${budget.total}
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium leading-none">{item.category}</p>
+              <p className="text-xs text-muted-foreground">
+                ${item.spent.toFixed(0)} of ${item.total.toFixed(0)}
               </p>
             </div>
-            <div className="text-sm font-medium">{budget.percentage}%</div>
+            <div className="text-sm font-medium">{item.percentage}%</div>
           </div>
-          <Progress
-            value={budget.percentage}
-            className="h-2"
-          />
+          <Progress value={item.percentage} className="h-2" />
         </div>
       ))}
     </div>
   )
 }
-
-const budgets = [
-  {
-    category: "Housing",
-    spent: 1200,
-    total: 1200,
-    percentage: 100,
-  },
-  {
-    category: "Food & Groceries",
-    spent: 350,
-    total: 500,
-    percentage: 70,
-  },
-  {
-    category: "Transportation",
-    spent: 120,
-    total: 300,
-    percentage: 40,
-  },
-  {
-    category: "Entertainment",
-    spent: 150,
-    total: 200,
-    percentage: 75,
-  },
-  {
-    category: "Utilities",
-    spent: 180,
-    total: 250,
-    percentage: 72,
-  },
-]
