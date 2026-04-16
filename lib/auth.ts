@@ -5,7 +5,9 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { compare } from "bcrypt"
 import { PrismaClient } from "@prisma/client"
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  datasourceUrl: process.env.DIRECT_URL || process.env.DATABASE_URL,
+})
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
