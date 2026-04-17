@@ -151,7 +151,6 @@ export function AIAssistant({ inline = false }: { inline?: boolean }) {
             className="relative flex items-center gap-2 rounded-full bg-gradient-to-br from-primary to-blue-600 px-4 h-12 shadow-lg shadow-primary/30 text-white font-medium text-sm transition-transform active:scale-95"
             aria-label="Open AI Assistant"
           >
-            <Sparkles className="h-4 w-4" />
             <span>AI Chat</span>
             <span className="absolute -inset-0.5 rounded-full animate-ping bg-primary/30 pointer-events-none" />
           </button>
@@ -237,7 +236,6 @@ export function AIAssistant({ inline = false }: { inline?: boolean }) {
           className="relative flex items-center gap-2 rounded-full bg-gradient-to-br from-primary to-blue-600 px-4 h-12 shadow-lg shadow-primary/30 text-white font-medium text-sm transition-transform hover:scale-105 active:scale-95"
           aria-label="Open AI Assistant"
         >
-          <Sparkles className="h-4 w-4" />
           <span>AI Chat</span>
         </button>
       )}
