@@ -475,7 +475,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen text-[#015C92] dark:text-white overflow-x-hidden transition-colors duration-300">
       {/* Fixed solid base — always visible during iOS overscroll/fast scroll */}
-      <div className="fixed inset-0 bg-[#f8fafc] dark:bg-[#020617]" style={{ zIndex: -1 }} />
+      <div className="fixed inset-0 bg-[#f8fafc]/90 dark:bg-[#020617]/90" style={{ zIndex: -1 }} />
 
       <GrainOverlay />
       <MouseSpotlight />
@@ -514,7 +514,7 @@ export default function LandingPage() {
       </header>
 
       {/* ── HERO ────────────────────────────────────────────────── */}
-      <section className="relative z-10 flex flex-col items-center text-center px-6 pt-14 pb-10">
+      <section className="relative z-10 bg-[#f8fafc]/90 dark:bg-[#020617]/90 flex flex-col items-center text-center px-6 pt-14 pb-10">
 
         <motion.h1
           variants={fadeUp} initial="hidden" animate="show" custom={0}
@@ -564,7 +564,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEATURES ────────────────────────────────────────────── */}
-      <section id="features" className="relative z-10 py-24 px-6">
+      <section id="features" className="relative z-10 bg-[#f8fafc]/90 dark:bg-[#020617]/90 py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
             className="text-center mb-16">
@@ -596,7 +596,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── ABOUT CTA ───────────────────────────────────────────── */}
-      <section className="relative z-10 py-10 px-6">
+      <section className="relative z-10 bg-[#f8fafc]/90 dark:bg-[#020617]/90 py-10 px-6">
         <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
           className="flex justify-center">
           <PrimaryBtn href="/about">
@@ -606,7 +606,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ────────────────────────────────────────── */}
-      <section id="how-it-works" className="relative z-10 py-24 px-6">
+      <section id="how-it-works" className="relative z-10 bg-[#f8fafc]/90 dark:bg-[#020617]/90 py-24 px-6">
         <div className="max-w-4xl mx-auto">
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
             className="text-center mb-16">
@@ -640,7 +640,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── PRICING ─────────────────────────────────────────────── */}
-      <section id="pricing" className="relative z-10 py-24 px-6">
+      <section id="pricing" className="relative z-10 bg-[#f8fafc]/90 dark:bg-[#020617]/90 py-24 px-6">
         <div className="max-w-4xl mx-auto">
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
             className="text-center mb-16">
@@ -726,7 +726,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FINAL CTA ───────────────────────────────────────────── */}
-      <section className="relative z-10 py-24 px-6 text-center">
+      <section className="relative z-10 bg-[#f8fafc]/90 dark:bg-[#020617]/90 py-24 px-6 text-center">
         <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
           className="max-w-3xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3">
@@ -748,7 +748,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ──────────────────────────────────────────────── */}
-      <footer className="relative z-10 py-10 px-6 backdrop-blur-sm"
+      <footer className="relative z-10 bg-[#f8fafc]/90 dark:bg-[#020617]/90 py-10 px-6 backdrop-blur-sm"
         style={{
           borderTop: "1px solid var(--lp-footer-border)",
           background: "var(--lp-footer-bg)",
