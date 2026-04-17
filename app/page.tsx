@@ -610,7 +610,7 @@ export default function LandingPage() {
             className="text-center mb-16">
             <p className="text-sm font-semibold mb-3 uppercase tracking-widest" style={{ color: C.primary }}>How It Works</p>
             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white">Up and running in</h2>
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-200 dark:text-slate-700">3 simple steps</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-500 dark:text-slate-400">3 simple steps</h2>
           </motion.div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -624,7 +624,7 @@ export default function LandingPage() {
                   className="text-5xl font-black mb-4 leading-none bg-clip-text text-transparent"
                   style={{
                     backgroundImage: `linear-gradient(90deg,${C.deep},${C.primary})`,
-                    opacity: 0.60,
+                    opacity: 0.85,
                   }}
                 >
                   {s.step}
