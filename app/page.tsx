@@ -473,7 +473,7 @@ function PrimaryBtn({ children, href, size = "default" }: {
    ───────────────────────────────────────────────────────────────── */
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] text-[#015C92] dark:text-white overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] text-[#015C92] dark:text-white overflow-x-hidden transition-colors duration-300 overscroll-none">
 
       <GrainOverlay />
       <MouseSpotlight />
