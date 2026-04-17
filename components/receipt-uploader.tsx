@@ -530,7 +530,7 @@ export function ReceiptUploader() {
             {!extractedReceipt && (
               <div
                 className={cn(
-                  "border-2 border-dashed rounded-lg p-8 text-center flex flex-col items-center justify-center gap-4",
+                  "border-2 border-dashed rounded-lg p-4 sm:p-8 text-center flex flex-col items-center justify-center gap-4",
                   "hover:border-primary/50 transition-colors",
                   isUploading && "border-primary/50 bg-primary/5",
                 )}
@@ -581,12 +581,12 @@ export function ReceiptUploader() {
                       <p className="text-lg font-medium">Drag and drop your receipt here</p>
                       <p className="text-sm text-muted-foreground mt-1">or click the buttons below to upload</p>
                     </div>
-                    <div className="flex gap-4 mt-4">
-                      <Button onClick={triggerFileInput}>
+                    <div className="flex flex-wrap justify-center gap-2 mt-4 w-full">
+                      <Button onClick={triggerFileInput} className="flex-1 min-w-[120px] max-w-[180px]">
                         <Upload className="mr-2 h-4 w-4" />
                         Upload File
                       </Button>
-                      <Button variant="outline" onClick={handleCameraCapture}>
+                      <Button variant="outline" onClick={handleCameraCapture} className="flex-1 min-w-[120px] max-w-[180px]">
                         <Camera className="mr-2 h-4 w-4" />
                         Take Photo
                       </Button>

@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
 import { useMutation } from "@tanstack/react-query"
-import { Loader2, Send, Minimize2, Bot } from "lucide-react"
+import { Loader2, Send, ChevronDown, Sparkles, Bot } from "lucide-react"
+import { useDevice } from "@/hooks/use-device"
+import { cn } from "@/lib/utils"
 
 interface Message {
   role: "user" | "assistant"
@@ -16,92 +16,89 @@ interface Message {
 
 const WELCOME_MESSAGE: Message = {
   role: "assistant",
-  content: "Hello! I'm your Masari AI financial assistant. I have access to your real income, expenses, budgets, and goals — so ask me anything specific about your finances and I'll give you advice based on your actual numbers.",
+  content:
+    "Hello! I'm your Masari AI financial assistant. I have access to your real income, expenses, budgets, and goals — so ask me anything specific about your finances and I'll give you advice based on your actual numbers.",
 }
 
 export function AIAssistant({ inline = false }: { inline?: boolean }) {
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE])
   const [input, setInput] = useState("")
-  const [isMinimized, setIsMinimized] = useState(!inline)
+  const [isOpen, setIsOpen] = useState(inline)
   const { toast } = useToast()
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const device = useDevice()
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
 
   const sendMessage = async (content: string): Promise<void> => {
     try {
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           messages: [...messages, { role: "user", content }],
-      }),
-    })
+        }),
+      })
 
-    if (!response.ok) {
+      if (!response.ok) {
         let errorMessage = `Error: ${response.status}`
         try {
-      const data = await response.json()
+          const data = await response.json()
           errorMessage = data.error || errorMessage
-        } catch (e) {
-          // If we can't parse the error response, use the status
-        }
+        } catch {}
         throw new Error(errorMessage)
-    }
+      }
 
-    if (!response.body) {
-      throw new Error("No response body")
-    }
+      if (!response.body) throw new Error("No response body")
 
-    const reader = response.body.getReader()
-    const decoder = new TextDecoder()
-    let assistantMessage = { role: "assistant" as const, content: "" }
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let assistantMessage = { role: "assistant" as const, content: "" }
       let hasAddedMessage = false
 
-    try {
-      while (true) {
-        const { value, done } = await reader.read()
-        if (done) break
+      try {
+        while (true) {
+          const { value, done } = await reader.read()
+          if (done) break
 
           const chunk = decoder.decode(value, { stream: true })
-        const lines = chunk.split("\n")
+          const lines = chunk.split("\n")
 
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
               const data = line.slice(6).trim()
-            if (data === "[DONE]") break
+              if (data === "[DONE]") break
               if (!data) continue
 
-            try {
-              const parsed = JSON.parse(data)
+              try {
+                const parsed = JSON.parse(data)
                 if (parsed.content) {
-              assistantMessage.content += parsed.content
-                  
-              // Update the message in real-time
-              setMessages((prev) => {
+                  assistantMessage.content += parsed.content
+                  setMessages((prev) => {
                     if (!hasAddedMessage) {
                       hasAddedMessage = true
                       return [...prev, { ...assistantMessage }]
                     } else {
-                      const newMessages = [...prev]
-                      newMessages[newMessages.length - 1] = { ...assistantMessage }
-                      return newMessages
+                      const next = [...prev]
+                      next[next.length - 1] = { ...assistantMessage }
+                      return next
                     }
-              })
+                  })
                 }
-            } catch (e) {
-                console.warn("Failed to parse chunk:", data, e)
+              } catch {}
             }
           }
         }
-      }
-    } finally {
-      reader.releaseLock()
+      } finally {
+        reader.releaseLock()
       }
 
-      // Ensure we have a final message
       if (!hasAddedMessage && assistantMessage.content) {
         setMessages((prev) => [...prev, assistantMessage])
       }
     } catch (error) {
-      console.error("Error in sendMessage:", error)
       throw error
     }
   }
@@ -113,27 +110,19 @@ export function AIAssistant({ inline = false }: { inline?: boolean }) {
       setMessages((prev) => [...prev, newMessage])
       return { newMessage }
     },
-    onError: (error: Error, content, context) => {
-      // Remove the user message that failed to send
+    onError: (error: Error, _content, context) => {
       if (context?.newMessage) {
-        setMessages((prev) => 
-          prev.filter(msg => msg !== context.newMessage)
-        )
+        setMessages((prev) => prev.filter((msg) => msg !== context.newMessage))
       }
-      
       toast({
         title: "Error",
         description: error.message || "Failed to send message. Please try again.",
         variant: "destructive",
       })
     },
-    onSuccess: () => {
-      // Message was sent successfully, no need to do anything
-      // The streaming response will handle adding the assistant's response
-    }
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || mutation.isPending) return
     const content = input.trim()
@@ -141,48 +130,158 @@ export function AIAssistant({ inline = false }: { inline?: boolean }) {
     mutation.mutate(content)
   }
 
-  if (isMinimized && !inline) {
+  // Inline mode (e.g. desktop sidebar)
+  if (inline) {
     return (
-      <Button
-        className="rounded-full p-4 h-14 w-14"
-        onClick={() => setIsMinimized(false)}
-      >
-        <Bot className="h-6 w-6" />
-      </Button>
+      <div className="w-full rounded-xl border overflow-hidden flex flex-col" style={{ height: "500px" }}>
+        <ChatPanel messages={messages} input={input} setInput={setInput} handleSubmit={handleSubmit} isPending={mutation.isPending} messagesEndRef={messagesEndRef} />
+      </div>
     )
   }
 
+  // Mobile: full-screen overlay when open
+  if (device.isMobile) {
+    return (
+      <>
+        {/* FAB */}
+        {!isOpen && (
+          <button
+            onClick={() => setIsOpen(true)}
+            className="relative flex items-center gap-2 rounded-full bg-gradient-to-br from-primary to-blue-600 px-4 h-12 shadow-lg shadow-primary/30 text-white font-medium text-sm transition-transform active:scale-95"
+            aria-label="Open AI Assistant"
+          >
+            <Sparkles className="h-4 w-4" />
+            <span>AI Chat</span>
+            {/* pulse ring */}
+            <span className="absolute -inset-0.5 rounded-full animate-ping bg-primary/30 pointer-events-none" />
+          </button>
+        )}
+
+        {/* Full-screen overlay */}
+        {isOpen && (
+          <div className="fixed inset-0 z-50 flex flex-col bg-background">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b bg-background shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-blue-600">
+                  <Sparkles className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm leading-none">Financial Assistant</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Powered by MA$ARI AI</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+                <ChevronDown className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+              {messages.map((message, index) => (
+                <div key={index} className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
+                  {message.role === "assistant" && (
+                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center mr-2 mt-1 shrink-0">
+                      <Bot className="h-3.5 w-3.5 text-white" />
+                    </div>
+                  )}
+                  <div
+                    className={cn(
+                      "rounded-2xl px-4 py-2.5 max-w-[78%] text-sm leading-relaxed",
+                      message.role === "assistant"
+                        ? "bg-muted rounded-tl-sm"
+                        : "bg-primary text-primary-foreground rounded-tr-sm"
+                    )}
+                  >
+                    {message.content}
+                  </div>
+                </div>
+              ))}
+              {mutation.isPending && (
+                <div className="flex justify-start">
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center mr-2 shrink-0">
+                    <Bot className="h-3.5 w-3.5 text-white" />
+                  </div>
+                  <div className="rounded-2xl rounded-tl-sm px-4 py-3 bg-muted">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input */}
+            <div className="shrink-0 border-t px-4 py-3 bg-background pb-safe">
+              <form onSubmit={handleSubmit} className="flex gap-2">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask me anything about your finances..."
+                  disabled={mutation.isPending}
+                  className="flex-1 rounded-full bg-muted border-0 px-4"
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={mutation.isPending || !input.trim()}
+                  className="rounded-full h-10 w-10 bg-primary shrink-0"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </form>
+            </div>
+          </div>
+        )}
+      </>
+    )
+  }
+
+  // Desktop: floating card
   return (
-    <Card className={inline ? "w-full shadow-none border-0" : "w-full max-w-md shadow-lg"}>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Bot className="h-5 w-5" />
-          Financial Assistant
-        </CardTitle>
-        {!inline && <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsMinimized(true)}
+    <>
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="relative flex items-center gap-2 rounded-full bg-gradient-to-br from-primary to-blue-600 px-4 h-12 shadow-lg shadow-primary/30 text-white font-medium text-sm transition-transform hover:scale-105 active:scale-95"
+          aria-label="Open AI Assistant"
         >
-          <Minimize2 className="h-4 w-4" />
-        </Button>}
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[400px] pr-4">
-          <div className="space-y-4">
+          <Sparkles className="h-4 w-4" />
+          <span>AI Chat</span>
+        </button>
+      )}
+
+      {isOpen && (
+        <div className="w-[380px] rounded-2xl border bg-background shadow-xl overflow-hidden flex flex-col" style={{ maxHeight: "520px" }}>
+          <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-blue-600">
+                <Sparkles className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm leading-none">Financial Assistant</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Powered by MA$ARI AI</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+              <ChevronDown className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0">
             {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  message.role === "assistant" ? "justify-start" : "justify-end"
-                }`}
-              >
+              <div key={index} className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
+                {message.role === "assistant" && (
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center mr-2 mt-1 shrink-0">
+                    <Bot className="h-3.5 w-3.5 text-white" />
+                  </div>
+                )}
                 <div
-                  className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                  className={cn(
+                    "rounded-2xl px-4 py-2.5 max-w-[78%] text-sm leading-relaxed",
                     message.role === "assistant"
-                      ? "bg-muted"
-                      : "bg-primary text-primary-foreground"
-                  }`}
+                      ? "bg-muted rounded-tl-sm"
+                      : "bg-primary text-primary-foreground rounded-tr-sm"
+                  )}
                 >
                   {message.content}
                 </div>
@@ -190,27 +289,105 @@ export function AIAssistant({ inline = false }: { inline?: boolean }) {
             ))}
             {mutation.isPending && (
               <div className="flex justify-start">
-                <div className="rounded-lg px-4 py-2 bg-muted">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center mr-2 shrink-0">
+                  <Bot className="h-3.5 w-3.5 text-white" />
+                </div>
+                <div className="rounded-2xl rounded-tl-sm px-4 py-3 bg-muted">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
-        </ScrollArea>
-      </CardContent>
-      <CardFooter>
-        <form onSubmit={handleSubmit} className="flex w-full gap-2">
+
+          <div className="shrink-0 border-t px-4 py-3">
+            <form onSubmit={handleSubmit} className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask me anything about your finances..."
+                disabled={mutation.isPending}
+                className="flex-1 rounded-full bg-muted border-0 px-4"
+              />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={mutation.isPending || !input.trim()}
+                className="rounded-full h-10 w-10 bg-primary shrink-0"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+function ChatPanel({
+  messages,
+  input,
+  setInput,
+  handleSubmit,
+  isPending,
+  messagesEndRef,
+}: {
+  messages: Message[]
+  input: string
+  setInput: (v: string) => void
+  handleSubmit: (e: React.FormEvent) => void
+  isPending: boolean
+  messagesEndRef: React.RefObject<HTMLDivElement>
+}) {
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0">
+        {messages.map((message, index) => (
+          <div key={index} className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
+            {message.role === "assistant" && (
+              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center mr-2 mt-1 shrink-0">
+                <Bot className="h-3.5 w-3.5 text-white" />
+              </div>
+            )}
+            <div
+              className={cn(
+                "rounded-2xl px-4 py-2.5 max-w-[78%] text-sm leading-relaxed",
+                message.role === "assistant"
+                  ? "bg-muted rounded-tl-sm"
+                  : "bg-primary text-primary-foreground rounded-tr-sm"
+              )}
+            >
+              {message.content}
+            </div>
+          </div>
+        ))}
+        {isPending && (
+          <div className="flex justify-start">
+            <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center mr-2 shrink-0">
+              <Bot className="h-3.5 w-3.5 text-white" />
+            </div>
+            <div className="rounded-2xl rounded-tl-sm px-4 py-3 bg-muted">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+      <div className="shrink-0 border-t px-4 py-3">
+        <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask me anything about your finances..."
-            disabled={mutation.isPending}
+            disabled={isPending}
+            className="flex-1 rounded-full bg-muted border-0 px-4"
           />
-          <Button type="submit" disabled={mutation.isPending || !input.trim()}>
+          <Button type="submit" size="icon" disabled={isPending || !input.trim()} className="rounded-full h-10 w-10 bg-primary shrink-0">
             <Send className="h-4 w-4" />
           </Button>
         </form>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   )
-} 
+}
