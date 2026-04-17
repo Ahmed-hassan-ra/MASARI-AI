@@ -625,41 +625,9 @@ body {
   }
 
   @media (max-width: 768px) {
-    /* Ensure AI assistant is properly positioned on mobile */
     .mobile-ai-assistant {
-      bottom: calc(70px + 20px); /* Bottom nav height + margin */
+      bottom: calc(70px + 12px);
       right: 16px;
-    }
-    
-    /* Scale down AI assistant button on very small screens */
-    .mobile-ai-assistant > button {
-      width: 48px;
-      height: 48px;
-      min-width: 48px;
-    }
-    
-    /* Adjust AI assistant dialog for mobile */
-    .mobile-ai-assistant [role="dialog"] {
-      position: fixed;
-      bottom: calc(70px + 60px); /* Above AI button */
-      right: 16px;
-      left: 16px;
-      top: auto;
-      max-height: 60vh;
-      transform: none;
-    }
-  }
-
-  /* Mobile keyboard handling */
-  @media (max-width: 768px) and (max-height: 500px) {
-    /* When keyboard is open (landscape or small screens) */
-    .mobile-ai-assistant {
-      bottom: 20px;
-    }
-    
-    .mobile-ai-assistant [role="dialog"] {
-      bottom: 70px;
-      max-height: 40vh;
     }
   }
 }

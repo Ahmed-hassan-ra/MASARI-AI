@@ -159,7 +159,7 @@ export function AIAssistant({ inline = false }: { inline?: boolean }) {
 
         {/* Full-screen overlay */}
         {isOpen && (
-          <div className="fixed inset-0 z-50 flex flex-col bg-background">
+          <div className="fixed inset-0 z-[200] flex flex-col bg-background">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b bg-background shrink-0">
               <div className="flex items-center gap-2">
@@ -177,7 +177,7 @@ export function AIAssistant({ inline = false }: { inline?: boolean }) {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+            <div className="flex-1 overflow-y-auto px-4 py-4 min-h-0 flex flex-col justify-end gap-3">
               {messages.map((message, index) => (
                 <div key={index} className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
                   {message.role === "assistant" && (

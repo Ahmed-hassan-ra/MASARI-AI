@@ -27,7 +27,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
   const pathname = usePathname()
 
   const navItems = [
-    { href: "/", icon: Home, label: "Home" },
+    { href: "/dashboard", icon: Home, label: "Home" },
     { href: "/budgets", icon: PiggyBank, label: "Budget" },
     { href: "/expenses", icon: CreditCard, label: "Expense" },
     { href: "/income", icon: TrendingUp, label: "Income" },
@@ -68,7 +68,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
         <div className="flex items-center justify-around py-1 px-1">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = pathname === item.href
+            const isActive = pathname === item.href || (item.href === "/dashboard" && pathname === "/")
 
             return (
               <Link
