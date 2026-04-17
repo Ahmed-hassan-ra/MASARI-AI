@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
+import { signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -13,7 +14,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Loader2 } from "lucide-react"
+import { Loader2, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 
 const settingsFormSchema = z.object({
@@ -29,6 +30,8 @@ type SettingsFormValues = z.infer<typeof settingsFormSchema>
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState("")
   const { toast } = useToast()
   const router = useRouter()
   const { setTheme } = useTheme()
@@ -93,14 +96,29 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleDeleteAccount() {
+    if (deleteConfirmText !== "DELETE") return
+    setIsDeletingAccount(true)
+    try {
+      const res = await fetch("/api/user/delete", { method: "DELETE" })
+      if (!res.ok) throw new Error()
+      await signOut({ redirect: false })
+      router.push("/auth/login")
+    } catch {
+      toast({ title: "Error", description: "Failed to delete account. Please try again.", variant: "destructive" })
+      setIsDeletingAccount(false)
+    }
+  }
+
   return (
-    <main className="flex flex-1 flex-col gap-6 p-6">
+    <main className="flex flex-1 flex-col gap-6 md:p-8">
       <h1 className="text-2xl font-semibold">Settings</h1>
 
       <Tabs defaultValue="preferences" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="preferences">Preferences</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="account">Account</TabsTrigger>
         </TabsList>
 
         <TabsContent value="preferences" className="space-y-4 mt-4">
@@ -241,17 +259,6 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile</CardTitle>
-              <CardDescription>Update your name, email, and avatar.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild variant="outline">
-                <Link href="/profile">Go to Profile</Link>
-              </Button>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-4 mt-4">
@@ -282,6 +289,67 @@ export default function SettingsPage() {
                 </div>
                 <Switch defaultChecked />
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="account" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile</CardTitle>
+              <CardDescription>Manage your name, email, and avatar.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline">
+                <Link href="/profile">Go to Profile</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-destructive/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="h-5 w-5" />
+                Danger Zone
+              </CardTitle>
+              <CardDescription>
+                Permanently delete your account and all associated data. This action cannot be undone.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 space-y-3">
+                <p className="text-sm font-medium">What will be deleted:</p>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                  <li>All your expenses, income, and budgets</li>
+                  <li>All receipts and uploaded images</li>
+                  <li>All financial goals and notifications</li>
+                  <li>Your profile and account settings</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Type <span className="font-mono font-bold text-destructive">DELETE</span> to confirm
+                </p>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="Type DELETE to confirm"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border-destructive/50"
+                />
+              </div>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== "DELETE" || isDeletingAccount}
+                className="w-full sm:w-auto"
+              >
+                {isDeletingAccount ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Deleting account...</>
+                ) : (
+                  "Delete My Account"
+                )}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>

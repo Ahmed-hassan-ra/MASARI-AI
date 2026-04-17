@@ -4,7 +4,7 @@ import { ReceiptUploader } from "@/components/receipt-uploader"
 
 export default function ReceiptsPage() {
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+    <main className="flex flex-1 flex-col gap-4 md:gap-8 md:p-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-semibold">Receipt Scanner</h1>
         <Button className="w-full sm:w-auto">
