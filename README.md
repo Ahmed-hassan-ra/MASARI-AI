@@ -87,4 +87,6 @@ public/             # Static assets
 
 ## License
 
-MIT
+Copyright © 2026 Ahmed Hassan. All rights reserved.
+
+This project and its source code are proprietary. No part of this project may be copied, modified, distributed, or used without explicit written permission from the author.
