@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
@@ -152,14 +153,13 @@ export function AIAssistant({ inline = false }: { inline?: boolean }) {
           >
             <Sparkles className="h-4 w-4" />
             <span>AI Chat</span>
-            {/* pulse ring */}
             <span className="absolute -inset-0.5 rounded-full animate-ping bg-primary/30 pointer-events-none" />
           </button>
         )}
 
-        {/* Full-screen overlay */}
-        {isOpen && (
-          <div className="fixed inset-0 z-[200] flex flex-col bg-background">
+        {/* Portal: renders directly in document.body, bypasses all z-index stacking contexts */}
+        {isOpen && typeof document !== "undefined" && createPortal(
+          <div className="fixed inset-0 flex flex-col bg-background" style={{ zIndex: 9999 }}>
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b bg-background shrink-0">
               <div className="flex items-center gap-2">
@@ -177,7 +177,7 @@ export function AIAssistant({ inline = false }: { inline?: boolean }) {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 min-h-0 flex flex-col justify-end gap-3">
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
               {messages.map((message, index) => (
                 <div key={index} className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
                   {message.role === "assistant" && (
@@ -185,14 +185,10 @@ export function AIAssistant({ inline = false }: { inline?: boolean }) {
                       <Bot className="h-3.5 w-3.5 text-white" />
                     </div>
                   )}
-                  <div
-                    className={cn(
-                      "rounded-2xl px-4 py-2.5 max-w-[78%] text-sm leading-relaxed",
-                      message.role === "assistant"
-                        ? "bg-muted rounded-tl-sm"
-                        : "bg-primary text-primary-foreground rounded-tr-sm"
-                    )}
-                  >
+                  <div className={cn(
+                    "rounded-2xl px-4 py-2.5 max-w-[78%] text-sm leading-relaxed",
+                    message.role === "assistant" ? "bg-muted rounded-tl-sm" : "bg-primary text-primary-foreground rounded-tr-sm"
+                  )}>
                     {message.content}
                   </div>
                 </div>
@@ -211,7 +207,7 @@ export function AIAssistant({ inline = false }: { inline?: boolean }) {
             </div>
 
             {/* Input */}
-            <div className="shrink-0 border-t px-4 py-3 bg-background pb-safe">
+            <div className="shrink-0 border-t px-4 py-3 bg-background" style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}>
               <form onSubmit={handleSubmit} className="flex gap-2">
                 <Input
                   value={input}
@@ -220,17 +216,13 @@ export function AIAssistant({ inline = false }: { inline?: boolean }) {
                   disabled={mutation.isPending}
                   className="flex-1 rounded-full bg-muted border-0 px-4"
                 />
-                <Button
-                  type="submit"
-                  size="icon"
-                  disabled={mutation.isPending || !input.trim()}
-                  className="rounded-full h-10 w-10 bg-primary shrink-0"
-                >
+                <Button type="submit" size="icon" disabled={mutation.isPending || !input.trim()} className="rounded-full h-10 w-10 bg-primary shrink-0">
                   <Send className="h-4 w-4" />
                 </Button>
               </form>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </>
     )
