@@ -168,7 +168,7 @@ while (User continues using app?) is (yes)
   case (AI Assistant)
     :Open AI assistant chat;
     :Enter financial query;
-    :Send to AI service (OpenAI/Groq);
+    :Send to AI service (Groq);
     :Process user's financial data;
     :Generate personalized insights;
     :Display AI recommendations;

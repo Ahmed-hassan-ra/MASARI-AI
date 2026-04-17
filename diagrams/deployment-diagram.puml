@@ -26,7 +26,7 @@ node "Development Environment" DEV_ENV {
 }
 
 node "Production Environment" PROD_ENV {
-  artifact "Next.js Application\n(Vercel/Netlify)" as prodapp
+  artifact "Next.js Application" as prodapp
   artifact "Static Assets\n(CDN)" as cdn
   artifact "API Routes\n(Serverless Functions)" as api
   artifact "Environment Variables\n(.env.production)" as prodenv
@@ -50,22 +50,12 @@ cloud "External Services" EXTERNAL_SERVICE {
     artifact "NextAuth.js Providers\n(Google, GitHub, etc.)" as authproviders
   }
   
-  node "File Storage" as storagecloud {
-    artifact "Cloudinary\n(Image Storage)" as cloudinary
-  }
-  
   node "AI Services" as aicloud {
-    artifact "OpenAI API" as openai
     artifact "Groq API" as groq
   }
-  
-  node "Email Services" as emailcloud {
-    artifact "SMTP Provider\n(SendGrid, etc.)" as smtp
-  }
-  
+
   node "Monitoring & Analytics" as monitoring {
-    artifact "Error Tracking\n(Sentry)" as sentry
-    artifact "Analytics\n(Vercel Analytics)" as analytics
+    artifact "Analytics\n(Google Analytics)" as analytics
   }
 }
 
@@ -88,17 +78,12 @@ client --> devserver : "HTTP Requests\n(Development)"
 prodapp --> maindb : "Database Queries\n(Prisma)"
 api --> maindb : "CRUD Operations"
 prodapp --> authproviders : "OAuth Authentication"
-prodapp --> cloudinary : "File Upload/Retrieval"
-prodapp --> openai : "AI Processing"
 prodapp --> groq : "AI Processing"
-prodapp --> smtp : "Email Notifications"
-prodapp --> sentry : "Error Reporting"
 prodapp --> analytics : "Usage Analytics"
 
 ' Development connections
 devserver --> devdb : "Local Database\nQueries"
 devserver --> authproviders : "OAuth (Dev Keys)"
-devserver --> cloudinary : "File Upload (Dev)"
 
 ' Security connections
 client --> security : "All Requests"
@@ -115,8 +100,6 @@ note right of devserver : "Hot reloading\nFile watching\nLocal development"
 note right of maindb : "Production database\nACID compliance\nDaily backups"
 
 note right of authproviders : "OAuth 2.0\nJWT tokens\nSession management"
-
-note right of cloudinary : "Image optimization\nCDN distribution\nFormat conversion"
 
 note right of security : "DDoS protection\nXSS prevention\nCSRF protection"
 

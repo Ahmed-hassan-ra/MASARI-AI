@@ -157,7 +157,7 @@ note right of dashboard : "Main dashboard with\nresponsive design\nfor mobile/ta
 
 note right of ocrprocessor : "Processes receipt images\nusing Tesseract.js\nExtracts transaction data"
 
-note right of aiinsights : "AI-powered financial\ninsights and recommendations\nUsing OpenAI/Groq APIs"
+note right of aiinsights : "AI-powered financial\ninsights and recommendations\nUsing Groq API"
 
 note right of usedevice : "Custom hook for\nresponsive design\nDetects screen size"
 

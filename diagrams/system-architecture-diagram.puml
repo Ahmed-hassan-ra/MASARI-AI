@@ -45,8 +45,7 @@ package "Data Layer" DATABASE {
 package "External Services" EXTERNAL {
   [Authentication\n(NextAuth.js)] as auth
   [OCR Service\n(Tesseract.js)] as ocr
-  [AI Services\n(OpenAI/Groq)] as ai
-  [File Storage\n(Cloudinary)] as storage
+  [AI Services\n(Groq)] as ai
   [Email Service\n(Nodemailer)] as email
 }
 
@@ -67,7 +66,6 @@ api --> prisma : "CRUD Operations"
 
 ' Backend to External Services
 middleware --> auth : "Authentication"
-upload --> storage : "File Upload"
 logic --> ocr : "Receipt Processing"
 logic --> ai : "AI Insights"
 api --> email : "Notifications"
