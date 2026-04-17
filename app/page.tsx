@@ -473,7 +473,9 @@ function PrimaryBtn({ children, href, size = "default" }: {
    ───────────────────────────────────────────────────────────────── */
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] text-[#015C92] dark:text-white overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen text-[#015C92] dark:text-white overflow-x-hidden transition-colors duration-300">
+      {/* Fixed solid base — always visible during iOS overscroll/fast scroll */}
+      <div className="fixed inset-0 bg-[#f8fafc] dark:bg-[#020617]" style={{ zIndex: -1 }} />
 
       <GrainOverlay />
       <MouseSpotlight />
