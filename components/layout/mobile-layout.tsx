@@ -3,16 +3,13 @@
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { 
-  Home, 
-  PiggyBank, 
-  CreditCard, 
-  TrendingUp, 
-  BarChart3, 
+import {
+  Home,
+  Wallet,
+  CreditCard,
+  TrendingUp,
+  BarChart3,
   Receipt,
-  User,
-  Settings,
-  Bell
 } from "lucide-react"
 import { UserNav } from "./user-nav"
 import { NotificationBell } from "../notifications/notification-bell"
@@ -28,7 +25,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
 
   const navItems = [
     { href: "/dashboard", icon: Home, label: "Home" },
-    { href: "/budgets", icon: PiggyBank, label: "Budget" },
+    { href: "/budgets", icon: Wallet, label: "Budget" },
     { href: "/expenses", icon: CreditCard, label: "Expense" },
     { href: "/income", icon: TrendingUp, label: "Income" },
     { href: "/reports", icon: BarChart3, label: "Reports" },
@@ -40,7 +37,6 @@ export function MobileLayout({ children }: MobileLayoutProps) {
       <header className="sticky top-0 z-50 bg-background border-b px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <PiggyBank className="h-6 w-6 text-primary" />
             <span className="font-bold text-lg">MA$ARI</span>
           </div>
           <div className="flex items-center gap-2">
