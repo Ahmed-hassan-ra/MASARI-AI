@@ -7,7 +7,7 @@ sdk: docker
 pinned: false
 app_port: 7860
 thumbnail: >-
-  https://huggingface.co/spaces/ahmed-hassan-ra/MASARI-AI/resolve/main/public/logo.png
+  https://cdn-uploads.huggingface.co/production/uploads/69e03dceaa71fc958b6be67a/1U3xxfaUF7p3zGaLEfvK9.png
 ---
 
 <div align="center">
