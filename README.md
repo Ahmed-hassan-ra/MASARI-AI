@@ -6,6 +6,8 @@ colorTo: indigo
 sdk: docker
 pinned: false
 app_port: 7860
+thumbnail: >-
+  https://huggingface.co/spaces/ahmed-hassan-ra/MASARI-AI/resolve/main/public/logo.png
 ---
 
 <div align="center">
