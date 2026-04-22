@@ -509,6 +509,12 @@ export default function LandingPage() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
+          <Button size="sm" variant="ghost"
+            className="rounded-xl font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+            style={{ border: "1px solid var(--lp-btn-sec-border)" }}
+            asChild>
+            <Link href="/auth/login">Sign In</Link>
+          </Button>
           <PrimaryBtn href="/auth/register" size="sm">Get Started</PrimaryBtn>
         </div>
       </header>
