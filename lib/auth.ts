@@ -2,12 +2,8 @@ import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { compare } from "bcrypt"
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient({
-  datasourceUrl: process.env.DIRECT_URL || process.env.DATABASE_URL,
-})
+import { compare } from "bcryptjs"
+import { prisma } from "@/lib/prisma"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
