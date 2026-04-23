@@ -7,7 +7,7 @@ export async function middleware(request: NextRequest) {
   const isAuthenticated = !!token
 
   // Public routes — accessible without login
-  const publicRoutes = ["/", "/about", "/auth/login", "/auth/register", "/auth/error", "/api/auth", "/api/register"]
+  const publicRoutes = ["/", "/about", "/contact", "/privacy", "/terms", "/auth/login", "/auth/register", "/auth/error", "/api/auth", "/api/register", "/api/contact"]
 
   // Auth routes — redirect to dashboard if already logged in
   const authRoutes = ["/auth/login", "/auth/register"]
