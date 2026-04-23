@@ -772,10 +772,10 @@ export default function LandingPage() {
           <p className="text-slate-400 text-sm">© 2026 MASARI-AI. All rights reserved.</p>
           <div className="flex gap-6 text-sm text-slate-400">
             {[
-              { href: "/about", label: "About Us" },
-              { href: "#",      label: "Privacy"  },
-              { href: "#",      label: "Terms"    },
-              { href: "#",      label: "Contact"  },
+              { href: "/about",   label: "About Us" },
+              { href: "/privacy", label: "Privacy"  },
+              { href: "/terms",   label: "Terms"    },
+              { href: "/contact", label: "Contact"  },
             ].map(l => (
               <Link key={l.label} href={l.href}
                 className="transition-colors hover:text-slate-900 dark:hover:text-white"
