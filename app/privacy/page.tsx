@@ -27,11 +27,7 @@ const sections = [
   },
   {
     title: "Data Storage & Security",
-    body: "Your data is stored in a secure PostgreSQL database hosted on Supabase. Passwords are hashed using bcryptjs and never stored in plain text. All connections are encrypted via TLS.",
-  },
-  {
-    title: "Third-Party Services",
-    body: "We use Google OAuth for authentication (optional), Groq AI for generating financial insights, and Supabase for database and file storage. Each service has its own privacy policy.",
+    body: "Your data is stored in a secure PostgreSQL database. Passwords are hashed and never stored in plain text. All connections are encrypted.",
   },
   {
     title: "Your Rights",
