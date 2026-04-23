@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Plus, DollarSign, TrendingUp, TrendingDown, PiggyBank, Settings } from "lucide-react"
+import { Plus, DollarSign, TrendingUp, TrendingDown, Settings } from "lucide-react"
 import { AddTransactionDialog } from "@/components/add-transaction-dialog"
 import Link from "next/link"
 import { useCurrency } from "@/lib/currency-context"
@@ -107,9 +107,6 @@ export function MobileDashboard() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <PiggyBank className="h-5 w-5 text-blue-600" />
-              </div>
               <div>
                 <p className="text-sm font-medium">Savings Rate</p>
                 <p className="text-xs text-muted-foreground">Based on current month data</p>
