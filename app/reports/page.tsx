@@ -88,7 +88,8 @@ export default function ReportsPage() {
         
         const response = await fetch(url)
         if (!response.ok) {
-          throw new Error('Failed to fetch report data')
+          const errBody = await response.json().catch(() => ({}))
+          throw new Error(errBody.error || `Server error ${response.status}`)
         }
         const data = await response.json()
         setReportData(data)
@@ -96,7 +97,7 @@ export default function ReportsPage() {
         console.error('Error fetching report data:', error)
         toast({
           title: "Error",
-          description: "Failed to load report data",
+          description: error instanceof Error ? error.message : "Failed to load report data",
           variant: "destructive",
         })
       } finally {

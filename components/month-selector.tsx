@@ -54,7 +54,7 @@ export function MonthSelector({
   const isFutureMonth = selectedYear > currentYear || (selectedYear === currentYear && selectedMonth > currentMonth)
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={`flex items-center gap-1 overflow-x-auto ${className}`}>
       <Button
         variant="outline"
         size="icon"
@@ -113,9 +113,9 @@ export function MonthSelector({
           variant="ghost"
           size="sm"
           onClick={goToCurrentMonth}
-          className="h-8 px-2 text-xs"
+          className="h-8 px-2 text-xs shrink-0"
         >
-          Current
+          Now
         </Button>
       )}
     </div>

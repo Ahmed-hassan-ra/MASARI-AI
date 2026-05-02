@@ -101,7 +101,7 @@ export default function IncomePage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="date">Date</Label>
-                <Input id="date" name="date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required disabled={isLoading} />
+                <Input id="date" name="date" type="date" defaultValue={(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` })()} required disabled={isLoading} />
               </div>
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Adding...</> : <><PlusCircle className="mr-2 h-4 w-4" />Add Income</>}

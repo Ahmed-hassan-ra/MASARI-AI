@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/db"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -144,51 +146,43 @@ export async function GET(req: Request) {
       incomeByCategory.set(incomeItem.category, current + incomeItem.amount)
     })
 
-    // Get monthly data for charts (last 6 months) - optimize with single query
-    const monthlyData = []
+    // Get monthly data for charts (last 6 months) using 2 bulk queries instead of 12
     const currentDate = new Date()
-    
-    // Build all date ranges first
-    const monthRanges = []
+    const sixMonthsAgo = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, 1)
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    const [allMonthlyExpenses, allMonthlyIncome] = await Promise.all([
+      prisma.expense.findMany({
+        where: { userId: session.user.id, date: { gte: sixMonthsAgo } },
+        select: { date: true, amount: true },
+      }),
+      prisma.income.findMany({
+        where: { userId: session.user.id, date: { gte: sixMonthsAgo } },
+        select: { date: true, amount: true },
+      }),
+    ])
+
+    const monthlyData = []
     for (let i = 5; i >= 0; i--) {
       const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1)
-      const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() - i + 1, 0)
-      monthRanges.push({ start: monthStart, end: monthEnd, name: monthStart.toLocaleDateString('en-US', { month: 'short' }) })
-    }
+      const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() - i + 1, 0, 23, 59, 59, 999)
+      const monthLabel = monthNames[monthStart.getMonth()]
 
-    // Fetch all monthly data in parallel using Promise.all for better performance
-    const monthlyResults = await Promise.all(
-      monthRanges.map(async (range) => {
-        const [monthExpenseSum, monthIncomeSum] = await Promise.all([
-          prisma.expense.aggregate({
-            where: {
-              userId: session.user.id,
-              date: { gte: range.start, lte: range.end },
-            },
-            _sum: { amount: true },
-          }),
-          prisma.income.aggregate({
-            where: {
-              userId: session.user.id,
-              date: { gte: range.start, lte: range.end },
-            },
-            _sum: { amount: true },
-          }),
-        ])
+      const monthIncomeTotal = allMonthlyIncome
+        .filter(r => r.date >= monthStart && r.date <= monthEnd)
+        .reduce((sum, r) => sum + r.amount, 0)
+      const monthExpenseTotal = allMonthlyExpenses
+        .filter(r => r.date >= monthStart && r.date <= monthEnd)
+        .reduce((sum, r) => sum + r.amount, 0)
 
-        const monthIncomeTotal = monthIncomeSum._sum.amount || 0
-        const monthExpenseTotal = monthExpenseSum._sum.amount || 0
-
-        return {
-          name: range.name,
-          income: monthIncomeTotal,
-          expenses: monthExpenseTotal,
-          savings: monthIncomeTotal - monthExpenseTotal,
-        }
+      monthlyData.push({
+        name: monthLabel,
+        income: monthIncomeTotal,
+        expenses: monthExpenseTotal,
+        savings: monthIncomeTotal - monthExpenseTotal,
       })
-    )
-
-    monthlyData.push(...monthlyResults)
+    }
 
     const reportData = {
       summary: {
@@ -226,27 +220,12 @@ export async function GET(req: Request) {
 
     return NextResponse.json(reportData, {
       headers: {
-        "Cache-Control": "public, max-age=300", // Cache for 5 minutes
+        "Cache-Control": "private, no-store",
       }
     })
   } catch (error) {
     console.error("[REPORTS_DATA] Error:", error)
-    
-    // Provide more specific error messages
-    let errorMessage = "Internal server error"
-    let statusCode = 500
-    
-    if (error instanceof Error) {
-      if (error.message.includes("database") || error.message.includes("prisma")) {
-        errorMessage = "Database connection error. Please try again later."
-      } else if (error.message.includes("timeout")) {
-        errorMessage = "Request timed out. Please refresh the page."
-        statusCode = 408
-      }
-    }
-    
-    return NextResponse.json({ 
-      error: errorMessage 
-    }, { status: statusCode })
+    const message = error instanceof Error ? error.message : "Internal server error"
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 } 

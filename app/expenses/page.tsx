@@ -15,7 +15,8 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function ExpensesPage() {
   const [refreshExpenses, setRefreshExpenses] = useState(0)
-  const [formData, setFormData] = useState({ description: "", amount: "", category: "", date: new Date().toISOString().split("T")[0] })
+  const todayLocal = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` })()
+  const [formData, setFormData] = useState({ description: "", amount: "", category: "", date: todayLocal })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const currentDate = new Date()
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth())
@@ -38,7 +39,8 @@ export default function ExpensesPage() {
         body: JSON.stringify({ ...formData, amount: parseFloat(formData.amount) }),
       })
       if (res.ok) {
-        setFormData({ description: "", amount: "", category: "", date: new Date().toISOString().split("T")[0] })
+        const d = new Date(); const reset = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+        setFormData({ description: "", amount: "", category: "", date: reset })
         handleExpenseAdded()
         toast({ title: "Success", description: "Expense saved successfully" })
       } else {
